@@ -11,7 +11,7 @@ $(document).ready(function(){
     });
 })
 
-var messages = []
+var messages = [];
 
 function addMessage(message,render=true){
     // add message to the messages list 
@@ -33,3 +33,18 @@ function addMessage(message,render=true){
 function renderMessages(){
     //  go thought the list backwards to add it to the list 
 }
+
+
+/* 
+    Looks for a user's private key in the local storage and if 
+    found will use it to connect to the chat room via websockets 
+    to the server, there are 2 possibilites now 
+    1. private key is good  
+    2. private key is bad so send a new private key that is put into local storage 
+    Next it will send a message to get all the users of the chat room and historical messages up too 200 for now 
+    but there is going to be a way to load in more historical data 
+    
+*/
+function initChatRoomClient(){
+
+};
