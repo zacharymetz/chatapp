@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <!-- Can template in things here like the name of the chat room-->
+    <title>Chat Room</title>
+    <script src="/static/lib/jquery.js"></script>
+    <script src="/static/lib/jsrender.js"></script>
+    <link href="/static/styles/chat.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <div class="top-wrapper">
+      <div class="messages-container">
+        <div class="container-title">You are <span id="current-user">User1</span></div>
+        <div class="inner-box">
+            <ul class="inverted-list" id="message-list">
+                <li>
+                    <div class="message">
+                        <span class="message-time">18:03</span> 
+                        <span class="message-user">User 1</span>:
+                        <span class="message-payload">This is the very first message</span>
+                    </div>
+                </li>
+                <li>
+                    <div class="message">
+                        <span class="message-time">18:03</span> 
+                        <span class="message-user">User 1</span>:
+                        <span class="message-payload">This is the very first message</span>
+                    </div>
+                </li>
+            </ul>
+            
+
+
+        </div>
+      </div>
+      <div class="users-container">
+        <div class="container-title">Users Online</div>
+        <div class="inner-box">
+            <ul class="inverted-list" id="users-list">
+                <li>
+                    <div class="char-room-user ">
+                        User 1
+                    </div>
+                </li>
+                <li>
+                    <div class="char-room-user ">
+                        Bob
+                    </div>
+                </li>
+                <li>
+                    <div class="char-room-user ">
+                        Alice
+                    </div>
+                </li>
+            </ul>
+          
+        </div>
+      </div>
+
+    
+      
+    </div>
+    <div class="message-box-wrapper">
+      <div class="message-box inner-box">
+        <input type="text" class="message-box-textarea" id="message-text">
+        <button class="send-message" id="send-btn">Send</button>
+      </div>
+    </div>
+    <script src="/static/scripts/chat.js"></script>
+
+    <!-- Templates Down Bellow -->
+    <script id="message-tmpl" type="text/x-jsrender">
+        <li>
+            <div class="message">
+                <span class="message-time">18:03</span> 
+                <span class="message-user">User 1</span>:
+                <span class="message-payload">{{:message}}</span>
+            </div>
+        </li>
+
+    </script>
+    <!-- the user template takes in  -->
+    <script id="user-tmpl" type="text/x-jsrender">
+        <li>
+            <div class="char-room-user "
+            {{if color}}
+                style="color:{{:color}};"
+            {{/if}} >
+            {{:username}}
+            </div>
+        </li>
+    </script>
+  </body>
+</html>

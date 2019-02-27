@@ -1,0 +1,102 @@
+{% extends "layout.html" %}
+{% block title %}Assigmnet 2 chat application{% endblock %}
+{% block dependancies %}
+<link href="/static/lib/bootstrap.css" rel="stylesheet" type="text/css" />
+<script src="/static/lib/jquery.js"></script>
+<script src="/static/lib/swal2.js"></script>
+<script src="/static/lib/jsgrid.js"></script>
+<link href="/static/lib/jsgrid.css" rel="stylesheet" type="text/css" />
+<link href="/static/lib/jsgrid-theme.css" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% block body %}
+<style>
+.chat-buttons{
+    text-align:center;
+    padding:1rem 0;
+}
+</style>
+<div class="container">
+    <h1>Assigment</h1>
+    <div class="chat-buttons">
+            <input type="text" id="new-room-name"><button type="button" class="btn btn-primary btn-lg" id="new-chat-room">New Chat Room</button>
+    </div>
+    <div id="chatRoomGrid"></div>
+    
+</div>
+
+<script>
+    function createRoom(){
+        
+    }
+$(function(){
+    //  buttons 
+    $("#new-chat-room").click(function(){
+        console.log("asdffasdfdsa");
+        $.post("/chat/NewChatRoom", { name: $("#new-room-name").val() })
+                .done(function( data ) {
+                    if(data.success){
+                        window.open("/static/chat.html?roomHash="+data.hash,"mywindow","status=1");
+                    }else{  //  create an error message if thinfs go wrong 
+                        Swal.fire({
+                        type: 'error',
+                        title: 'Error',
+                        text: 'Something whent wrong when creating your chat room. Please Try Again'
+                        });
+                    }
+                });
+        
+        // create a new button listener 
+        
+        //window.open("/static/chat.html?roomHash=853C69355188ABADD3AC49F21ED5F7E901AD554E","mywindow","status=1");
+    });
+    
+
+    $("#chatRoomGrid").jsGrid({
+        width: "100%",
+        filtering: true,
+
+               editing: true,
+               sorting: true,
+               paging: true,
+               autoload: true,
+               pageSize: 20,
+               pageLoading:true,
+      pageButtonCount: 7,
+        fields: [
+            { name: "name",title: "Room Name", type: "text" },
+            { name: "hash",title: "Hash", type: "text" },
+            
+
+        ],
+        rowClick: function(args) {
+          console.log(args);
+          var getData = args.item;
+          var keys = Object.keys(getData);
+          var text = [];
+          window.open("/static/chat.html?roomHash=853C69355188ABADD3AC49F21ED5F7E901AD554E","mywindow","status=1");
+
+        },
+        controller: {
+          loadData: function(filter) {
+                var d = $.Deferred();
+                $.ajax({
+                  type: 'POST',
+                    url: "/chat/GetChatRooms",
+                    dataType: "json",
+                    data: filter
+                }).done(function(dataResult) {
+                  console.log(dataResult);
+                    d.resolve(dataResult);
+                });
+
+                return d.promise();
+            }
+
+          }
+    });
+});
+</script>
+
+
+{% endblock %}

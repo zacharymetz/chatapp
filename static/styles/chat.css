@@ -1,0 +1,92 @@
+body{
+margin:0;
+padding:0;
+background:white;
+}
+.top-wrapper{
+display: flex;  
+flex-flow: row wrap;
+align-items: stretch;
+height:calc( 100vh - 4rem);
+}
+.messages-container{
+flex: 1 ;
+
+padding:0.5rem;
+padding-right:0.25rem;
+min-height:calc(100 - 4rem);
+display:flex;
+flex-direction: column;
+}
+.users-container{
+flex: 1 ;
+padding-left:0.25rem;
+padding:0.5rem;
+max-width:200px;
+display:flex;
+flex-direction: column;
+
+}
+.message-box-wrapper{
+height:4rem;
+padding:0 0.5rem;
+}
+.message-box{
+display:flex;
+border:1px solid white;
+padding:0.5rem;
+
+
+}
+.container-title{
+padding-left:1rem;
+}
+.inner-box{
+border:2px solid black;
+border-radius :0.25rem;
+position: relative;
+flex:1 1 auto;
+
+}
+
+.message-box-textarea{
+flex:1;
+}
+.send-message{
+margin-left:1rem;
+font-size:1.25rem;
+}
+
+.message{
+padding:0.25rem 0.5rem;
+}
+.message-list li:nth-child(2n){
+background:lightgray;
+border-right:0px solid black;
+}
+.char-room-user{
+padding:0.25rem 1rem;
+}
+
+.red{
+color:red;
+}
+.green{
+color:green;
+}
+.yellow{
+color:yellow;
+}
+.blue{
+color:blue;
+}
+
+.inverted-list{
+    list-style: none;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    margin:0;
+    padding:0;
+    width:100%;
+}
