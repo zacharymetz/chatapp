@@ -1,5 +1,5 @@
 
-var crypto = require('crypto'), shasum = crypto.createHash('sha1');
+var crypto = require('crypto');
 /*
   Use a seed or none to generate a 512 bit private user key,
   this is going to be my own algorithem so it might not
@@ -39,5 +39,9 @@ function generate512Private(seed=null){
   Its a nice unike way to identify people when they change their nick name 
 */
 function getPublicKey(privateKey){
-  return shasum.update(privateKey);
+  var shasum = crypto.createHash('sha1');
+  return shasum.update(privateKey).digest('hex');
 }
+
+module.exports.generate512Private = generate512Private;
+module.exports.getPublicKey = getPublicKey;

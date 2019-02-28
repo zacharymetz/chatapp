@@ -5,6 +5,7 @@ const db = require('../db');
 var crypto = require('crypto'), shasum = crypto.createHash('sha1');
 const express = require('express');
 var queryBuilder = require('./helpers/queryBuilder');
+var generators = require('./helpers/generators');
 var router = express.Router();
 
 /*
@@ -66,7 +67,7 @@ router.post('/NewChatRoom', (req, res) => {
   for (var i = 0; i < 32; i++)
     roomHash += possible.charAt(Math.floor(Math.random() * possible.length));
   
-  var query_options = [req.body.name,shasum.update(roomHash)];
+  var query_options = [req.body.name,shasum.update(roomHash).digest('hex')];
   db.query(sql,query_options ,(err, result) => {
     if(err){
       console.log(err);
@@ -80,6 +81,51 @@ router.post('/NewChatRoom', (req, res) => {
         hash: result.rows[0].hash //make sure to send back the new hash so they can redirect 
     }));
   }});
+});
+
+router.post('/NewAccount', (req, res) => {
+  
+  //  generate a new private key and insert it into 
+  //  the db and return it to them 
+  var sql = "INSERT INTO public.account(publickey, privatekey, created_at) VALUES ( $1, $2, now()) RETURNING accountid;";
+  //  generate a radnom sha1 hash for the room 
+  var key = generators.generate512Private();
+  var query_options = [generators.getPublicKey(key),key];
+  db.query(sql,query_options ,(err, result) => {
+    if(err){
+      console.log(err);
+      res.send(JSON.stringify({
+          success: false
+      }));
+    }else{
+      
+      console.log(result);
+      //  here we can give the new user a nic name and return the private hash
+      var nickname_sql = "INSERT INTO public.nickname( accountid, name, color, created_at)VALUES ( $1, $2, $3, now());";
+      var nickname_query_options = [result.rows[0].accountid,"User"+result.rows[0].accountid.toString(),"000000"];
+      db.query(sql,query_options,(err, result) => {
+        res.send(JSON.stringify({
+          "success": true,
+          "privatekey": key //make sure to send back the new hash so they can redirect 
+        }));
+      });
+      
+  }});
+});
+
+
+router.post('/JoinChatRoom', (req, res) => {
+
+  //  first lets see if this is the first time weve been too the room and then add us to the chat room 
+  
+  //  we need to see if there is a user and if so then we can 
+  //  get a list of the users in that chat room and up too 
+  //  the most 200 recent messages
+  var sql = "";
+  res.send(JSON.stringify({
+    "success": true
+  }));
+  
 });
 
 

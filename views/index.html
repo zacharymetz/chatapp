@@ -34,23 +34,35 @@ $(function(){
     $("#new-chat-room").click(function(){
         console.log("asdffasdfdsa");
         $.post("/chat/NewChatRoom", { name: $("#new-room-name").val() })
-                .done(function( data ) {
-                    if(data.success){
-                        window.open("/static/chat.html?roomHash="+data.hash,"mywindow","status=1");
-                    }else{  //  create an error message if thinfs go wrong 
-                        Swal.fire({
-                        type: 'error',
-                        title: 'Error',
-                        text: 'Something whent wrong when creating your chat room. Please Try Again'
-                        });
-                    }
-                });
-        
-        // create a new button listener 
-        
-        //window.open("/static/chat.html?roomHash=853C69355188ABADD3AC49F21ED5F7E901AD554E","mywindow","status=1");
-    });
-    
+            .done(function( data ) {
+                data = JSON.parse(data);
+                if(data.success){
+                    window.open("/static/chat.html?roomHash="+data.hash,"mywindow","status=1");
+                }else{  //  create an error message if thinfs go wrong 
+                    Swal.fire({
+                    type: 'error',
+                    title: 'Error',
+                    text: 'Something whent wrong when creating your chat room. Please Try Again'
+                    });
+                }
+            });
+        });
+
+    //  see if the user has an account in local cookies
+    if(document.cookie ==""){
+        console.log("no user detected");
+        //  get a new account since they have none 
+        $.post("/chat/NewAccount").done(function(data){
+            data = JSON.parse(data);
+            if(data.success){
+                
+                document.cookie = data.privatekey;
+            }else{
+                //refresh the page
+                // or fail silently 
+            }
+        });
+    }
 
     $("#chatRoomGrid").jsGrid({
         width: "100%",
@@ -74,7 +86,7 @@ $(function(){
           var getData = args.item;
           var keys = Object.keys(getData);
           var text = [];
-          window.open("/static/chat.html?roomHash=853C69355188ABADD3AC49F21ED5F7E901AD554E","mywindow","status=1");
+          window.open("/static/chat.html?roomHash="+getData.hash,"mywindow","status=1");
 
         },
         controller: {

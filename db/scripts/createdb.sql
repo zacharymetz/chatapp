@@ -30,3 +30,13 @@ Create Table message(
 	message text not null,
 	created_at timestamp with time zone not null
 );
+
+
+CREATE TABLE account_chatroom(
+    account_chatroomid serial PRIMARY KEY,
+	accountid int REFERENCES account(accountid) not null,
+	chatroomid int REFERENCES chatroom(chatroomid) not null,
+	date_joined timestamp with time zone not null
+);
+
+

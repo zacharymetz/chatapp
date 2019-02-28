@@ -1,50 +1,117 @@
-
+var socket;
 
 
 $(document).ready(function(){
+    initalizeClient();
     //  button and key even listeners 
     $("#send-btn").click(function(){
         if($("#message-text").val() != ""){
-            addMessage($("#message-text").val());
+            sendMessage($("#message-text").val());
             $("#message-text").val("");
         }
     });
+
+    $('#message-text').on('keyup', function() {
+        if (this.value.length > 1) {
+             // do search for this.value here
+             typingStart();
+        }
+   });
 })
 
-var messages = [];
+function initalizeClient(){
+    //  get the room hash to figure out 
+    if(document.cookie != ""){
+        var url = (new URL(window.location.href));
+        
+        $.post("/chat/JoinChatRoom", { userPublicKey: document.cookie, roomHash : (new URL(window.location.href)).searchParams.get("roomHash") })
+        .done(function( data ) {
+            data = JSON.parse(data);
+            if(data.success){
+                //  ask for the last 200 messages 
+                $.post("/chat/GetHistoricalMessages",{
+                    pageSize : 200,     //  how many messages to get 
+                    page : 1,           //  if we have to offset to the next page
+                    pageStart : (new Date).getTime()    //  so we dont double load if 
+                })                                      //  more messages are sent
+                .done(function(data){
 
-function addMessage(message,render=true){
-    // add message to the messages list 
-    messages.push({
-        "time" : (new Date()),
-        "user" : "User1",
-        "message" : message
-    });
-    if(render){ // for adding only if you want 
-        //render the new message
-        var template = $.templates("#message-tmpl");
+                });
 
-        var htmlOutput = template.render(messages[messages.length-1]);
+                //  now lets open a websockets connection to our server 
+                socket = io(window.location.origin,{user:document.cookie});
+                
+                //  reciving chat messages handler 
+                socket.on('chat message', function(msg){
+                    addMessage(msg);
+                    console.log('message: ' + JSON.stringify(msg));
+                });
 
-        $("#message-list").html($("#message-list").html() + htmlOutput);
+                //  reciving user updates for state 
+                socket.on('account state', function(msg){
+                    console.log('message: ' + JSON.stringify(msg));
+                });
+
+                //  start listening to a channel for this chat room 
+            }else{  //  create an error message if thinfs go wrong 
+                Swal.fire({
+                type: 'error',
+                title: 'Error',
+                text: 'There was an error joining the chat room, please try again later'
+                });
+            }
+        });
     }
 }
 
-function renderMessages(){
+
+var messages = []
+
+function addMessage(message){
+    var template = $.templates("#message-tmpl");
+    var htmlOutput = template.render({
+        time : new Date(message.created_at),
+        message: message.message
+    });
+    //  also inster it into the proper place in the list
+    $("#message-list").html($("#message-list").html() + htmlOutput);
+}
+
+function sendMessage(message){
+    // add message to the messages list 
+    socket.emit('chat message', JSON.stringify({ "message" : message, "userKey" : document.cookie, "roomHash":(new URL(window.location.href)).searchParams.get("roomHash") }));
+}
+//  take in a message list and add them in to the correct spot on the list and the message 
+//  internal list if i want to
+function renderMessages(messageList){
     //  go thought the list backwards to add it to the list 
 }
 
 
-/* 
-    Looks for a user's private key in the local storage and if 
-    found will use it to connect to the chat room via websockets 
-    to the server, there are 2 possibilites now 
-    1. private key is good  
-    2. private key is bad so send a new private key that is put into local storage 
-    Next it will send a message to get all the users of the chat room and historical messages up too 200 for now 
-    but there is going to be a way to load in more historical data 
-    
-*/
-function initChatRoomClient(){
-
-};
+//  events for typing and not typing 
+var typingTimeout;
+function typingStart(){
+    //  when people start typing into the message bar a timeout will set 
+    //  that will send a message to the account state line but will abort if
+    //  either the send button is pressed (another message will be instantly sent)
+    //  or more typing happens to the message 
+    if(typingTimeout == null){  //  if there is a typingTimeout object then
+                                //  we know that we have already been typing
+                                //  and should send a message saying we are typing 
+        socket.emit('account state',JSON.stringify({
+            typing : true,
+            userPrivateKey: document.cookie
+        }));
+        
+    }else{
+        clearTimeout(typingTimeout)
+        typingTimeout = null;
+    }
+    typingTimeout = setTimeout(function(){
+        socket.emit('account state',JSON.stringify({
+            typing : false,
+            userPrivateKey: document.cookie
+        }));
+        typingTimeout = null;
+    },1000);
+}
