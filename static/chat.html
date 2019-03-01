@@ -17,20 +17,7 @@
         <div class="container-title">You are <span id="current-user">User1</span></div>
         <div class="inner-box">
             <ul class="inverted-list" id="message-list">
-                <li>
-                    <div class="message">
-                        <span class="message-time">18:03</span> 
-                        <span class="message-user">User 1</span>:
-                        <span class="message-payload">This is the very first message</span>
-                    </div>
-                </li>
-                <li>
-                    <div class="message">
-                        <span class="message-time">18:03</span> 
-                        <span class="message-user">User 1</span>:
-                        <span class="message-payload">This is the very first message</span>
-                    </div>
-                </li>
+              
             </ul>
             
 
@@ -76,7 +63,7 @@
     <script id="message-tmpl" type="text/x-jsrender">
         <li>
             <div class="message">
-                <span class="message-time">18:03</span> 
+                <span class="message-time">{{:time}}</span> 
                 <span class="message-user">User 1</span>:
                 <span class="message-payload">{{:message}}</span>
             </div>

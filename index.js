@@ -3,6 +3,7 @@ const nunjucks = require('nunjucks');
 const db = require('./db');
 const generator = require('./controllers/helpers/generators');
 const bodyParser = require('body-parser');
+var URL = require('url').URL;
 
 const app = express();
 var http = require('http').Server(app);

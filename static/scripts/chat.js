@@ -1,5 +1,5 @@
 var socket;
-
+var messages;
 
 $(document).ready(function(){
     initalizeClient();
@@ -21,21 +21,37 @@ $(document).ready(function(){
 
 function initalizeClient(){
     //  get the room hash to figure out 
+    messages = [];  // initalize the messages list 
     if(document.cookie != ""){
         var url = (new URL(window.location.href));
         
-        $.post("/chat/JoinChatRoom", { userPublicKey: document.cookie, roomHash : (new URL(window.location.href)).searchParams.get("roomHash") })
+        $.post("/chat/JoinChatRoom", { userPrivateKey: document.cookie, roomHash : (new URL(window.location.href)).searchParams.get("roomHash") })
         .done(function( data ) {
             data = JSON.parse(data);
             if(data.success){
+                console.log("Joied the room lol");
                 //  ask for the last 200 messages 
                 $.post("/chat/GetHistoricalMessages",{
+                    roomHash : (new URL(window.location.href)).searchParams.get("roomHash"),
                     pageSize : 200,     //  how many messages to get 
                     page : 1,           //  if we have to offset to the next page
                     pageStart : (new Date).getTime()    //  so we dont double load if 
                 })                                      //  more messages are sent
                 .done(function(data){
-
+                    data = JSON.parse(data);
+                    if(data.success){
+                        renderMessages(data.messages);
+                    }else{
+                        Swal.fire({
+                            position: 'top-end',
+                            type: 'fail',
+                            title: 'Past Messages Could Not be Loaded',
+                            showConfirmButton: false,
+                            backdrop : false,
+                            timer: 1500
+                          })
+                    }
+                    
                 });
 
                 //  now lets open a websockets connection to our server 
@@ -65,7 +81,7 @@ function initalizeClient(){
 }
 
 
-var messages = []
+
 
 function addMessage(message){
     var template = $.templates("#message-tmpl");
@@ -85,6 +101,20 @@ function sendMessage(message){
 //  internal list if i want to
 function renderMessages(messageList){
     //  go thought the list backwards to add it to the list 
+    for(var i=0;i<messageList.length;i++){
+        //  add the messsages to the message list 
+        messages.push(messageList[i]);
+        //  render it in the list 
+        var template = $.templates("#message-tmpl");
+        var d = new Date(messageList[i].created_at);
+        var htmlOutput = template.render({
+            time :d.getHours()+":"+d.getMinutes()+":"+d.getSeconds() ,
+            message: messageList[i].message
+        });
+        //  also inster it into the proper place in the list
+        $("#message-list").html($("#message-list").html() + htmlOutput);
+
+    }
 }
 
 

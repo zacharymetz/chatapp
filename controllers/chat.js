@@ -90,7 +90,7 @@ router.post('/NewAccount', (req, res) => {
   var sql = "INSERT INTO public.account(publickey, privatekey, created_at) VALUES ( $1, $2, now()) RETURNING accountid;";
   //  generate a radnom sha1 hash for the room 
   var key = generators.generate512Private();
-  var query_options = [generators.getPublicKey(key),key];
+  var query_options = [generators.getPublicKey(key),"haha nothing here for security"];
   db.query(sql,query_options ,(err, result) => {
     if(err){
       console.log(err);
@@ -103,7 +103,7 @@ router.post('/NewAccount', (req, res) => {
       //  here we can give the new user a nic name and return the private hash
       var nickname_sql = "INSERT INTO public.nickname( accountid, name, color, created_at)VALUES ( $1, $2, $3, now());";
       var nickname_query_options = [result.rows[0].accountid,"User"+result.rows[0].accountid.toString(),"000000"];
-      db.query(sql,query_options,(err, result) => {
+      db.query(nickname_sql,nickname_query_options,(err, result) => {
         res.send(JSON.stringify({
           "success": true,
           "privatekey": key //make sure to send back the new hash so they can redirect 
@@ -115,16 +115,79 @@ router.post('/NewAccount', (req, res) => {
 
 
 router.post('/JoinChatRoom', (req, res) => {
-
+  var body = req.body;
   //  first lets see if this is the first time weve been too the room and then add us to the chat room 
+  sql = "INSERT INTO public.account_chatroom( accountid, chatroomid, date_joined) VALUES ( (Select accountid from account where publickey = $1),(select chatroomid from chatroom where hash = $2) , now());"
   
+  //  now we need to return a list of all of the users in the the chat room and 
+  //  their current nickname according to the database 
+  sql += "";
+  sql_options = [generators.getPublicKey(body.userPrivateKey),body.roomHash];
   //  we need to see if there is a user and if so then we can 
   //  get a list of the users in that chat room and up too 
   //  the most 200 recent messages
-  var sql = "";
-  res.send(JSON.stringify({
-    "success": true
-  }));
+  db.query(sql,sql_options ,(err, result) => {
+    if(err){
+      console.log(err);
+      res.send(JSON.stringify({
+          success: false
+      }));
+    }else{
+      res.send(JSON.stringify({
+        "success": true
+      }));
+    }
+  });
+  
+});
+router.post('/GetHistoricalMessages', (req, res) => {
+  
+  var body = req.body;
+
+  var sql = "Select * from message where created_in = (select chatroomid from chatroom Where hash = $1) ";
+  sql += "Limit " + parseInt(body.pageSize).toString() + "  ";
+  sql += "Offset " + (body.pageSize *(body.page -1)).toString() + "  ;";
+  sql_options = [body.roomHash];
+  console.log(sql);
+  db.query(sql,sql_options ,(err, result) => {
+    if(err){
+      console.log(err);
+      res.send(JSON.stringify({
+          success: false
+      }));
+    }else{
+      res.send(JSON.stringify({
+        "success": true,
+        "messages" : result.rows
+      }));
+    }
+  });
+  
+  
+});
+router.post('/GetChatRoomUsers', (req, res) => {
+  
+  var body = req.body;
+
+  var sql = "Select * from messages where created_in = (select chatroomid from chatroom Where hash = $1) ";
+  sql += "Limit " + parseInt(body.pageSize).toString() + "  ";
+  sql += "Offset " + (body.pageSize *(body.page -1)).toString() + "  ;";
+  sql_options = [body.roomHash];
+  console.log(sql);
+  db.query(sql,sql_options ,(err, result) => {
+    if(err){
+      console.log(err);
+      res.send(JSON.stringify({
+          success: false
+      }));
+    }else{
+      res.send(JSON.stringify({
+        "success": true,
+        "messages" : result.rows
+      }));
+    }
+  });
+  
   
 });
 

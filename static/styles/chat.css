@@ -89,4 +89,6 @@ color:blue;
     margin:0;
     padding:0;
     width:100%;
+    overflow-y: scroll;
+    max-height: 100%;
 }
