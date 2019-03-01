@@ -1,7 +1,10 @@
 body{
 margin:0;
 padding:0;
-background:white;
+background:#413f46;
+color:#e5e1e3;
+font-family: 'Courier New', Courier, monospace;
+
 }
 .top-wrapper{
 display: flex;  
@@ -26,31 +29,38 @@ max-width:200px;
 display:flex;
 flex-direction: column;
 
+
 }
+
 .message-box-wrapper{
 height:4rem;
 padding:0 0.5rem;
 }
 .message-box{
 display:flex;
-border:1px solid white;
 padding:0.5rem;
 
 
 }
 .container-title{
 padding-left:1rem;
+font-weight: 800;
 }
 .inner-box{
-border:2px solid black;
+
 border-radius :0.25rem;
 position: relative;
 flex:1 1 auto;
+position:relative;
 
 }
 
 .message-box-textarea{
 flex:1;
+border: none;
+background:#6b656a;
+color:#e5e1e3;
+padding:0 0.75rem;
 }
 .send-message{
 margin-left:1rem;
@@ -66,20 +76,21 @@ border-right:0px solid black;
 }
 .char-room-user{
 padding:0.25rem 1rem;
+position: relative;
+  display: inline-block;
 }
+.past-nicknames{
+    display: none;
+    position: absolute;
+    bottom: 50px;
+    background-color: #f1f1f1;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 10000;
+    text-align:center;
+ 
+}
+.char-room-user:hover .past-nicknames {display: block;}
 
-.red{
-color:red;
-}
-.green{
-color:green;
-}
-.yellow{
-color:yellow;
-}
-.blue{
-color:blue;
-}
 
 .inverted-list{
     list-style: none;
@@ -92,3 +103,69 @@ color:blue;
     overflow-y: scroll;
     max-height: 100%;
 }
+#send-btn{
+    all: unset;
+    font-weight: 700;
+    border: 1px solid transparent;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: .25rem;
+    cursor:pointer;
+    background: #f6a824;
+    
+    color:black;
+    margin:0 0.5rem;
+    display: inline-block;
+}
+
+::-webkit-scrollbar {
+    width: 0.4rem;
+  }
+  
+  /* Track */
+  ::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px #a1a2ae; 
+    border-radius: 0px;
+  }
+   
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: #f6a824; 
+    border-radius: 0px;
+  }
+  
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #f6a824; 
+  }
+
+  .is-dragover{
+    background-position:left;
+    background-repeat:no-repeat;
+    display:block!important;
+    
+    width:90%;
+    z-index:1000;
+    position:absolute;  
+    padding-top:0.25rem;
+    
+  }
+  .is-dragover p{
+      margin:0.2rem;
+      font-weight: 800;
+      text-align:center;
+  }
+  #file-drop-pic{
+    display:none;
+    
+  }
+  #file-upload-icon{
+    background-image :url('/static/icon.svg');
+    background-size: contain;
+    background-position: center; 
+    background-repeat: no-repeat;
+    height:1.5rem;
+    width:1.5rem;
+    margin:0 auto;
+  }

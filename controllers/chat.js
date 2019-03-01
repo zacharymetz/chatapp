@@ -117,34 +117,14 @@ router.post('/NewAccount', (req, res) => {
 router.post('/JoinChatRoom', (req, res) => {
   var body = req.body;
   //  first lets see if this is the first time weve been too the room and then add us to the chat room 
-  sql = "INSERT INTO public.account_chatroom( accountid, chatroomid, date_joined) VALUES ( (Select accountid from account where publickey = $1),(select chatroomid from chatroom where hash = $2) , now());"
   
-  //  now we need to return a list of all of the users in the the chat room and 
-  //  their current nickname according to the database 
-  sql += "";
-  sql_options = [generators.getPublicKey(body.userPrivateKey),body.roomHash];
-  //  we need to see if there is a user and if so then we can 
-  //  get a list of the users in that chat room and up too 
-  //  the most 200 recent messages
-  db.query(sql,sql_options ,(err, result) => {
-    if(err){
-      console.log(err);
-      res.send(JSON.stringify({
-          success: false
-      }));
-    }else{
-      res.send(JSON.stringify({
-        "success": true
-      }));
-    }
-  });
   
 });
 router.post('/GetHistoricalMessages', (req, res) => {
   
   var body = req.body;
 
-  var sql = "Select * from message where created_in = (select chatroomid from chatroom Where hash = $1) ";
+  var sql = "Select message.messageid, message.message, account.publickey, message.created_at from message inner join account on message.created_by = account.accountid where created_in = (select chatroomid from chatroom Where hash = $1) ";
   sql += "Limit " + parseInt(body.pageSize).toString() + "  ";
   sql += "Offset " + (body.pageSize *(body.page -1)).toString() + "  ;";
   sql_options = [body.roomHash];
@@ -169,9 +149,7 @@ router.post('/GetChatRoomUsers', (req, res) => {
   
   var body = req.body;
 
-  var sql = "Select * from messages where created_in = (select chatroomid from chatroom Where hash = $1) ";
-  sql += "Limit " + parseInt(body.pageSize).toString() + "  ";
-  sql += "Offset " + (body.pageSize *(body.page -1)).toString() + "  ;";
+  var sql = "Select  publickey ,name,color ,GREATEST (ni.nicknameid)from account inner join nickname as ni on ni.accountid = account.accountid where ni.accountid in (Select account.accountid from account_chatroom  Inner Join account ON account_chatroom.accountid = account.accountid GROUP BY account.accountid, chatroomid Having account_chatroom.chatroomid = (select chatroomid from chatroom where hash = $1)) and ni.nicknameid = (select nicknameid from nickname where accountid = ni.accountid order by created_at desc limit 1);";
   sql_options = [body.roomHash];
   console.log(sql);
   db.query(sql,sql_options ,(err, result) => {
@@ -183,14 +161,31 @@ router.post('/GetChatRoomUsers', (req, res) => {
     }else{
       res.send(JSON.stringify({
         "success": true,
-        "messages" : result.rows
+        "accounts" : result.rows
       }));
     }
   });
   
   
 });
-
-
-
+router.post('/GetPastUserNames', (req, res) => {
+  
+  var body = req.body;
+  var sql = "Select  name,color from  nickname where accountid =  (Select accountid from account where publickey = $1) order by created_at desc;";
+  sql_options = [body.accountPublicKey];
+  db.query(sql,sql_options ,(err, result) => {
+    if(err){
+      console.log(err);
+      res.send(JSON.stringify({
+          success: false
+      }));
+    }else{
+      console.log(result);
+      res.send(JSON.stringify({
+        "success": true,
+        "userNames" : result.rows
+      }));
+    }
+  });
+});
 module.exports = router;

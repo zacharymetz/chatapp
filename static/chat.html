@@ -8,13 +8,14 @@
     <script src="/static/lib/jquery.js"></script>
     <script src="/static/lib/jsrender.js"></script>
     <script src="/static/lib/swal2.js"></script>
+    <script src="/static/lib/jscolor.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <link href="/static/styles/chat.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
     <div class="top-wrapper">
       <div class="messages-container">
-        <div class="container-title">You are <span id="current-user">User1</span></div>
+        <div class="container-title">You are <span id="current-user"></span></div>
         <div class="inner-box">
             <ul class="inverted-list" id="message-list">
               
@@ -25,24 +26,10 @@
         </div>
       </div>
       <div class="users-container">
-        <div class="container-title">Users Online</div>
+        <div class="container-title">Users</div>
         <div class="inner-box">
             <ul class="inverted-list" id="users-list">
-                <li>
-                    <div class="char-room-user ">
-                        User 1
-                    </div>
-                </li>
-                <li>
-                    <div class="char-room-user ">
-                        Bob
-                    </div>
-                </li>
-                <li>
-                    <div class="char-room-user ">
-                        Alice
-                    </div>
-                </li>
+                
             </ul>
           
         </div>
@@ -52,7 +39,12 @@
       
     </div>
     <div class="message-box-wrapper">
-      <div class="message-box inner-box">
+      <div class="message-box inner-box file-drop-area" id="file-drop-area">
+        <div class="file-overlay" id="file-drop-pic" >
+          <div id="file-upload-icon"></div>
+          <p>Upload Files</p>
+        </div>
+        <input type="hidden" class="jscolor" id="color-area">
         <input type="text" class="message-box-textarea" id="message-text">
         <button class="send-message" id="send-btn">Send</button>
       </div>
@@ -64,7 +56,9 @@
         <li>
             <div class="message">
                 <span class="message-time">{{:time}}</span> 
-                <span class="message-user">User 1</span>:
+                <span class="message-user" {{if user.color != null }}
+                style="color:#{{:user.color}};"
+            {{/if}}>{{:user.userName}}</span>:
                 <span class="message-payload">{{:message}}</span>
             </div>
         </li>
@@ -72,12 +66,14 @@
     </script>
     <!-- the user template takes in  -->
     <script id="user-tmpl" type="text/x-jsrender">
-        <li>
-            <div class="char-room-user "
-            {{if color}}
-                style="color:{{:color}};"
+        <li style="position">
+            <div onmouseover="loadPastNickName('{{:publickey}}',this,function(accounts,originator){console.log($(originator).children().html(accounts))});" class="char-room-user "
+            {{if color != null }}
+                style="color:#{{:color}};"
             {{/if}} >
-            {{:username}}
+            {{:userName}}
+            <div class="past-nicknames" >afsdfads</div>
+
             </div>
         </li>
     </script>
