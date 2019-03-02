@@ -6,7 +6,10 @@ var crypto = require('crypto'), shasum = crypto.createHash('sha1');
 const express = require('express');
 var queryBuilder = require('./helpers/queryBuilder');
 var generators = require('./helpers/generators');
+var googleStorage = require('./helpers/gcupload');
 var router = express.Router();
+var multer  = require('multer');
+var upload = multer()
 
 /*
 
@@ -17,7 +20,7 @@ router.get('/', (req, res) => {
   res.render('chat.html');
 });
 router.post('/GetChatRooms',(req,res)=> {
-  console.log(req.body);
+  
   var query = req.body;
 
   //  need to add sorts up here since can do sql injections if not
@@ -25,9 +28,8 @@ router.post('/GetChatRooms',(req,res)=> {
   var sortFeild = null;
   var validSortFeilds = ["name","hash"];
   if(req.body.sortField != null){
-    console.log(req.body.sortField);
      for(var i=0;i<validSortFeilds.length;i++){ //  loop to see if valid sort
-       console.log(validSortFeilds[i]);
+       
        if(req.body.sortField == validSortFeilds[i]){
          sortFeild = validSortFeilds[i];
          break;
@@ -75,7 +77,6 @@ router.post('/NewChatRoom', (req, res) => {
           success: false
       }));
     }else{
-      console.log(result);
       res.send(JSON.stringify({
         success: true,
         hash: result.rows[0].hash //make sure to send back the new hash so they can redirect 
@@ -99,7 +100,6 @@ router.post('/NewAccount', (req, res) => {
       }));
     }else{
       
-      console.log(result);
       //  here we can give the new user a nic name and return the private hash
       var nickname_sql = "INSERT INTO public.nickname( accountid, name, color, created_at)VALUES ( $1, $2, $3, now());";
       var nickname_query_options = [result.rows[0].accountid,"User"+result.rows[0].accountid.toString(),"000000"];
@@ -113,13 +113,6 @@ router.post('/NewAccount', (req, res) => {
   }});
 });
 
-
-router.post('/JoinChatRoom', (req, res) => {
-  var body = req.body;
-  //  first lets see if this is the first time weve been too the room and then add us to the chat room 
-  
-  
-});
 router.post('/GetHistoricalMessages', (req, res) => {
   
   var body = req.body;
@@ -180,12 +173,94 @@ router.post('/GetPastUserNames', (req, res) => {
           success: false
       }));
     }else{
-      console.log(result);
       res.send(JSON.stringify({
         "success": true,
         "userNames" : result.rows
       }));
     }
   });
+});
+
+router.post('/postcontent/:roomHash',upload.any(), (req, res) => {
+  //  run a query to see 
+  //    if the file type is valid 
+  //    if the filesize is wihin the contriaint 
+  //    and if the user and room are real 
+  for(var i=0;i<req.files.length;i++){
+
+  
+    var sql = "SELECT"; 
+    /*See if the user exists*/
+    sql += " exists(select accountid from account where publickey = $1) ";
+    /* See if the room exists */
+    sql += "and exists(select chatroomid from chatroom where hash = $2) ";
+    /* see if the mimetype is accepted and that the file size is under */
+    
+    
+    /* get the mimefiletype and its newest max file size  */
+    sql += "and exists(select * from mimefiletype inner join mimetype on mimefiletype.mimetypeid = mimetype.mimetypeid  ";
+    sql += "where mimetype.mimetype = $3 and $4 <= (select sizeinbytes from maxfilesize where maxfilesize.maxfilesizeid = mimefiletype.maxfilesizeid));";
+    var sql_options = [generators.getPublicKey(req.header('Cookie').split(";")[0]),req.params.roomHash,req.files[i].mimetype,req.files[i].size];
+    
+    db.query(sql,sql_options, (err,result) =>{
+      
+      if(err){
+        res.send(JSON.stringify({
+              success : false,
+              message : err
+            }));
+      }else{
+        
+        if(result.rows[0]['?column?']){ //  make sure the file is within the constraints
+          
+        //  now we need to upload the file to google cloud
+        console.log(i);
+          googleStorage.sendUploadToGCS(req.files[i-1], (err)=>{
+            if(err){
+              console.log(err);
+              res.send(JSON.stringify({
+                success : false,
+                message : "Error uploading file to storage"
+              }));
+            }else{
+              //  its been uploaded to google cloud now we can 
+              //  save it in the database aswell as create a new 
+              //  message using the public key, roomHash, and messagemedia that can be sent to the room roomhash
+  
+              var message_sql ="";
+              var message_sql_options = [];
+              db.query(message_sql,message_sql_options,(result,err) => {
+                if(err){
+                  res.send(JSON.stringify({
+                  success : false,
+                  message : "There was an error sending the message, please try again."
+                }));
+                }else{
+                  //  send it to the chat messages channel with the room hash given 
+  
+                  res.send(JSON.stringify({
+                  success : true,
+                  message : "Upload Sucessful"
+                }));
+                }
+              });
+            }
+          });
+        }else{  //  
+          res.send(JSON.stringify({
+            success : false,
+            message : "Your file Type was invalid or the file size was too large"
+          }));
+        }
+        
+      }
+    });
+  
+  };
+  //  if its good then start the upload save it to the database 
+  //  return a true and update the rooms messages 
+
+  //  if not just return false maybe with a helpful error message 
+
 });
 module.exports = router;

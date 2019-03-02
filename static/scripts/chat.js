@@ -3,6 +3,10 @@ var messages;
 var accounts;
 var publickey;
 $(document).ready(function(){
+    //  put the loading screen up and then
+    //  pick a random loading icon
+    var loaders = ["square","fire","flask","ghost","block","line"];
+    $("#connection-loader-animation").addClass(loaders[Math.floor(Math.random() * 7199254740992) % loaders.length] + "_loader");
     initalizeClient();
     //  button and key even listeners 
     $("#send-btn").click(function(){
@@ -55,6 +59,7 @@ function initalizeClient(){
             })                                      //  more messages are sent
             .done(function(data){
                 data = JSON.parse(data);
+                $("#connection-loader").hide();
                 if(data.success){
                     renderMessages(data.messages);
                 }else{
@@ -66,7 +71,7 @@ function initalizeClient(){
                         backdrop : false,
                         timer: 1500
                         })
-                }
+                    }
                 
             });
 
@@ -116,6 +121,17 @@ function initalizeClient(){
 
             //  start listening to a channel for this chat room 
         });
+    }else{  //  there is not a valid cookie so we need to get a new account 
+            //  and then call itselft again so we can start the inializtation
+            //  again
+            $.post("/chat/NewAccount")
+            .then((data) => {
+                data = JSON.parse(data);
+                //  set the cookie 
+                document.cookie = data.privatekey;
+                initalizeClient();
+            });
+
     }
 }
 
@@ -205,25 +221,6 @@ function getPastNicknames(publicKey,callback){
     }).done(callback);
 }
 
-function loadPastNickName(publicKey,originator,callback){
-    //  if the current nick name is the same as the first nic name from the list 
-    //  then no request, if it is differnt then we send request 
-    getPastNicknames(publicKey,function(data){
-        data = JSON.parse(data);
-        if(data.success){
-            getUser(publicKey).pastNicknames = data.userNames;
-            //  create a nice string of the past user names to send 
-            var accounts = "";
-            for(var i=0;i<data.userNames.length;i++){
-                accounts += "<p>" + data.userNames[i].name +"</p>"
-            }
-            console.log(accounts);
-            callback(accounts,originator);
-        }else{
-            //  fail scilently 
-        }
-    });
-}
 
 //  events for typing and not typing 
 var typingTimeout;
@@ -266,10 +263,50 @@ $('#message-text').on('keyup', function() {
     }
 });
 
+function updateInfoContainer(publicKey){
+    //  put a little loading icon in the metadata container 
+
+    loadPastNickName(publicKey,(data) => {
+        //  hide the loading animation 
+        console.log(data);
+        $("#info-container-title").html(data.userName);
+        $("#info-container-pk").html(data.publickey);
+        $("#past-nicknames").html("");
+        for(var i=0;i<data.pastNicknames.length;i++){
+            var template = $.templates("#user-tmpl");
+            var htmlOutput = template.render({
+                userName : data.pastNicknames[i].name ,
+                color: data.pastNicknames[i].color.toString(16)
+            });
+        //  also inster it into the proper place in the list
+        
+            $("#past-nicknames").html($("#past-nicknames").html() + htmlOutput);
+        };
+    });
+    
+
+}
+
+function loadPastNickName(publicKey,callback){
+    //  if the current nick name is the same as the first nic name from the list 
+    //  then no request, if it is differnt then we send request 
+    getPastNicknames(publicKey,function(data){
+        data = JSON.parse(data);
+        if(data.success){
+            getUser(publicKey).pastNicknames = data.userNames;
+            //  create a nice string of the past user names to send 
+            callback(getUser(publicKey));
+        }else{
+            //  fail scilently 
+        }
+    });
+}
 
 
 //  2 event for file drag and dropping 
 $('#file-drop-area').on('drag dragstart dragend dragover dragenter dragleave drop', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
     e.preventDefault();
     e.stopPropagation();
   })
@@ -281,4 +318,21 @@ $('#file-drop-area').on('drag dragstart dragend dragover dragenter dragleave dro
   })
   .on('drop', function(e) {
     droppedFiles = e.originalEvent.dataTransfer.files;
+    var data = new FormData();
+    for(var i=0;i<droppedFiles.length;i++){
+        data.append('file-'+i, droppedFiles[i]);
+    }
+    $.ajax({
+        url: '/chat/postcontent/'+ (new URL(window.location.href)).searchParams.get("roomHash") ,
+        data: data,
+        cache: false,
+        contentType: false,
+        processData: false,
+        method: 'POST',
+        type: 'POST', // For jQuery < 1.9
+        done: function(data){
+            console.log(data)
+        }
+    });
+    
   });

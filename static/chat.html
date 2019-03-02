@@ -2,6 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
+    <link rel=icon href=/static/img/favicon.png>
     <meta name="viewport" content="width=device-width">
     <!-- Can template in things here like the name of the chat room-->
     <title>Chat Room</title>
@@ -16,6 +17,7 @@
     <div class="top-wrapper">
       <div class="messages-container">
         <div class="container-title">You are <span id="current-user"></span></div>
+        
         <div class="inner-box">
             <ul class="inverted-list" id="message-list">
               
@@ -26,7 +28,19 @@
         </div>
       </div>
       <div class="users-container">
-        <div class="container-title">Users</div>
+          <div class="" id="info-container-title">Room Info</div>
+          <div class="info-hash"><span style="padding-left: 1.25rem;"></span>Public Key: <br><span id="info-container-pk">688A598AFF3455FA2ED34656F58D7D927C475368</span></div>
+          <div >Past Nicknames:</div>
+          <div class="inner-box metadata-info">
+              
+              
+              <ul class="" id="past-nicknames">
+                  
+                
+              </ul>
+    
+          </div>
+        <div class="">Users</div>
         <div class="inner-box">
             <ul class="inverted-list" id="users-list">
                 
@@ -49,6 +63,14 @@
         <button class="send-message" id="send-btn">Send</button>
       </div>
     </div>
+    <div class="loader-overlay" id="connection-loader">
+      <div class="loader-wrapper">
+        <div class="loader-animation" id="connection-loader-animation"></div>
+        <div class="loader_text">
+          Connecting <br> please wait
+        </div>
+      </div>
+    </div>
     <script src="/static/scripts/chat.js"></script>
 
     <!-- Templates Down Bellow -->
@@ -66,15 +88,19 @@
     </script>
     <!-- the user template takes in  -->
     <script id="user-tmpl" type="text/x-jsrender">
-        <li style="position">
-            <div onmouseover="loadPastNickName('{{:publickey}}',this,function(accounts,originator){console.log($(originator).children().html(accounts))});" class="char-room-user "
+        <li class="position">
+            <div class="user-tmpl-text"
+            {{if publickey != null }}
+             onclick="updateInfoContainer('{{:publickey}}')"
+            {{/if}}
             {{if color != null }}
                 style="color:#{{:color}};"
             {{/if}} >
             {{:userName}}
-            <div class="past-nicknames" >afsdfads</div>
-
-            </div>
+            {{if publickey != null }}
+            <div class="online-indicator offline" id="account-online-{{:publickey}}"></div>
+            {{/if}}
+            
         </li>
     </script>
   </body>

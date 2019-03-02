@@ -54,13 +54,14 @@ io.on('connection', function(socket){
   //  clients sending messages 
   socket.on('chat message', function(msg){
     var body = JSON.parse(msg);
+    console.log(body);
     //  here is where i am gonna do all the command things 
     if(body.message.charAt(0) == "/"){
       //now lets check to see if eveything before the first " ", 
       var command = body.message.split(" ")[0].substring(1);
       if(command == "nick"){
         //  update the nick name in the database and then send the chat room a user state update ?
-        var sql = "INSERT INTO public.nickname(accountid, name, color, created_at) VALUES ( (select accountid from account where publickey = $1), $2, 000000, now()) RETURNING *;";
+        var sql = "INSERT INTO public.nickname(accountid, name, color, created_at) VALUES ( (select accountid from account where publickey = $1), $2, 000000, now()) RETURNING name, color;";
         var sql_options = [generator.getPublicKey(body.userKey),body.message.split(" ")[1]];
         db.query(sql,sql_options ,(err, result) => {
           if(err){
