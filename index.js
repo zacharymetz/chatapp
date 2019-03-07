@@ -24,8 +24,78 @@ var chat = require('./controllers/chat');
 var home = require('./controllers/home');
 
 
+
+
 app.use('/chat', chat);
+app.post("/GetOnlineUsers",(req,res)=>{
+  res.send(JSON.stringify({
+    success : true,
+    //  tell them the guy that is online so they can respond back
+    users: getConnectAccounts()
+  }));
+});
 app.use('/', home);
+
+
+
+//  this variable is for saving the socket id of the user 
+var onlineUsers = [];
+
+function addUser(publickey,id){
+  //  check if the user is in the list 
+  var index = -1;
+  for(var i=0;i<onlineUsers.length;i++){
+    if(onlineUsers[i].publickey == publickey){
+      index = i;
+      break;
+    }
+  }
+  if(index == -1){  //  it does not exist in the list so we should add it
+    onlineUsers.push({
+      'publickey' : publickey,
+      'ids' : [id]
+    });
+    console.log(onlineUsers);
+  }else{
+    onlineUsers[index].ids.push(id);
+  }
+  console.log(onlineUsers);
+}
+function removeUser(id){
+  //  go though the 2d list 
+  var i;
+  var j;
+  var found = false;
+  var returnKey;
+  for(i=0;i<onlineUsers.length;i++){
+    for(j=0;j<onlineUsers[i].ids.length;j++){
+      if(onlineUsers[i].ids[j] == id){
+        found = true;
+        returnKey = onlineUsers[i].publickey;
+        break;
+      }
+    }
+  }
+  if(found){
+    if(onlineUsers[i -1].ids.length > 1){  // remove the id from the 
+      onlineUsers[i - 1].ids.splice(j-1,1);
+    }else{  // remove the object from the list 
+      onlineUsers.splice(i-1, 1);
+      return returnKey;
+      
+    }
+  }
+}
+function getConnectAccounts(){
+  accountsList =[];
+  for(var i=0;i<onlineUsers.length;i++){
+    accountsList.push(onlineUsers[i].publickey);
+  }
+  return accountsList;
+}
+
+
+
 io.on('connection', function(socket){
   var userPrivateKey = socket.handshake.headers.cookie.split(";")[0]
   //  do a qquire here to set the users state to online and send an emit a message
@@ -37,24 +107,30 @@ io.on('connection', function(socket){
   //  we need to see if there is a user and if so then we can 
   //  get a list of the users in that chat room and up too 
   //  the most 200 recent messages
-  console.log(sql_options);
   db.query(sql,sql_options ,(err, result) => {
     if(err){
       console.log(err);
       
     }else{
       //  this is the sucess conditions 
+      addUser(generator.getPublicKey(userPrivateKey),socket.id);
+      //  send a message to asll clients that the user is online 
+      
+      
       console.log('User is online');
-    socket.join((new URL(socket.handshake.headers.referer)).searchParams.get("roomHash"));
-    socket.emit('hash',generator.getPublicKey(userPrivateKey));
-    console.log("user has joined room "+(new URL(socket.handshake.headers.referer)).searchParams.get("roomHash"));
+      socket.join((new URL(socket.handshake.headers.referer)).searchParams.get("roomHash"));
+      socket.emit('hash',generator.getPublicKey(userPrivateKey));
+      console.log("user has joined room "+(new URL(socket.handshake.headers.referer)).searchParams.get("roomHash"));
+      socket.broadcast.emit('account state', {
+        type : "userConnected",
+        publickey : generator.getPublicKey(userPrivateKey)
+      });
     }
   });
 
   //  clients sending messages 
   socket.on('chat message', function(msg){
     var body = JSON.parse(msg);
-    console.log(body);
     //  here is where i am gonna do all the command things 
     if(body.message.charAt(0) == "/"){
       //now lets check to see if eveything before the first " ", 
@@ -96,7 +172,8 @@ io.on('connection', function(socket){
     }else{  //  it isnt a command so we can just send the message
       var sql = "INSERT INTO public.message(created_by, created_in, message, created_at) VALUES ( (Select accountid from account where publickey = $1), (select chatroomid from chatroom where hash = $2),$3, now()) RETURNING *;";
       //  generate a radnom sha1 hash for the room 
-      console.log(sql)
+      
+
       var query_options = [generator.getPublicKey( body.userKey),body.roomHash,body.message];
       db.query(sql,query_options ,(err, result) => {
         if(err){
@@ -132,11 +209,34 @@ io.on('connection', function(socket){
 
   })
 
+  socket.on('ping',function(msg,socket){
+    var body = JSON.parse(msg);
+    console.log("got a ping");
+    if(type == "initalPing"){
+      socket.emit('account state', {
+      type : "onlineUsers",
+        //  tell them the guy that is online so they can respond back
+      users: getConnectAccounts()
+      });
+    
+    
+    
+
+  }});
+
 
   //  go offline and amke sure the user is registered as offline
   socket.on('disconnect', function(){
-    //  do a query here to set the users state to offline and send the message to 
-    //  the others in the chat room 
+    //  take the user offline if they are only connected by one socket id 
+    
+    var publickey = removeUser(socket.id);
+    console.log(publickey);
+    if(publickey != null){
+      socket.broadcast.emit('account state', {
+        type : "userDisconnected",
+        publickey : publickey
+      });
+    }
     console.log('User went offline');
   });
 });

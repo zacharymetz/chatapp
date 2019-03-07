@@ -121,7 +121,7 @@ router.post('/GetHistoricalMessages', (req, res) => {
   sql += "Limit " + parseInt(body.pageSize).toString() + "  ";
   sql += "Offset " + (body.pageSize *(body.page -1)).toString() + "  ;";
   sql_options = [body.roomHash];
-  console.log(sql);
+  
   db.query(sql,sql_options ,(err, result) => {
     if(err){
       console.log(err);
@@ -144,7 +144,6 @@ router.post('/GetChatRoomUsers', (req, res) => {
 
   var sql = "Select  publickey ,name,color ,GREATEST (ni.nicknameid)from account inner join nickname as ni on ni.accountid = account.accountid where ni.accountid in (Select account.accountid from account_chatroom  Inner Join account ON account_chatroom.accountid = account.accountid GROUP BY account.accountid, chatroomid Having account_chatroom.chatroomid = (select chatroomid from chatroom where hash = $1)) and ni.nicknameid = (select nicknameid from nickname where accountid = ni.accountid order by created_at desc limit 1);";
   sql_options = [body.roomHash];
-  console.log(sql);
   db.query(sql,sql_options ,(err, result) => {
     if(err){
       console.log(err);

@@ -29,8 +29,7 @@ function initalizeClient(){
     messages = [];  // initalize the messages list 
     accounts = [];
     if(document.cookie != ""){
-        
-        
+
         $.post("/chat/GetChatRoomUsers",{
             roomHash : (new URL(window.location.href)).searchParams.get("roomHash"),
             pageSize : 200,     //  how many messages to get 
@@ -50,6 +49,21 @@ function initalizeClient(){
                 
                
             }
+            $.post(
+                "/getOnlineUsers"
+            ).done((data)=>{
+                data = JSON.parse(data);
+                //  run through all of the online users and set them to online
+                console.log(data.users);
+                for(var i=0;i<data.users.length;i++){
+                    if(getUser(data.users[i]) != null){
+                        console.log("Setting to online");
+                        getUser(data.users[i]).online = true;
+                    }
+                }
+                //  rerender the accoutnsTab
+                renderAccountsTab();
+            });
             //  ask for the last 200 messages 
             $.post("/chat/GetHistoricalMessages",{
                 roomHash : (new URL(window.location.href)).searchParams.get("roomHash"),
@@ -93,14 +107,15 @@ function initalizeClient(){
                         $("#current-user").css( "color", "#" +accounts[i].color );
                     }
                 }
+                renderAccountsTab();
                 console.log('message: ' + JSON.stringify(msg));
             });
 
             //  reciving user updates for state 
             socket.on('account state', function(msg){
-                console.log('message: ' + JSON.stringify(msg));
+                console.log('asmessage: ' + JSON.stringify(msg));
                 //  if an update nickname commands comes 
-                if(msg.type = "nicknamechange"){
+                if(msg.type == "nicknamechange"){
                     //  go thought the users and find the same hash then replace it with the the new one and rerender the user list 
                     var i;
                     for(i=0;i<accounts.length;i++){
@@ -108,7 +123,7 @@ function initalizeClient(){
                             console.log(msg.publickey);
                         if(accounts[i].publickey == msg.publickey){
                             
-                            break
+                            break;
                         }
                     }
                     //  now we can replace the ith nick name and rerender the users 
@@ -116,9 +131,24 @@ function initalizeClient(){
                     accounts[i].color = msg.newColor.toString(16);
                     renderAccountsTab();
                     console.log(msg);
+                }else if(msg.type == "userConnected"){
+                    console.log("taking account offline");  
+                    bringAccountOnline(msg.publickey);
+                }else if(msg.type == "userDisconnected"){  
+                    console.log("taking account offline");
+                    bringAccountOffline(msg.publickey);
+                }else if(msg.type == "onlineUsers"){
+                    console.log("got a list of inline users");
+                    //  go though the list of accounts and set the proper ones to online before 
+                    
                 }
             });
 
+
+            //  send a message to the server requesting a list of online users 
+            
+            
+            
             //  start listening to a channel for this chat room 
         });
     }else{  //  there is not a valid cookie so we need to get a new account 
@@ -177,28 +207,39 @@ function renderMessages(messageList){
 }
 
 function addAccount(account){
+    console.log(account.publickey);
+    
     
     accounts.push({
         publickey : account.publickey,
         userName : account.name ,
-        color : account.color.toString(16)
+        color : account.color.toString(16),
+        online : false
     });
     var template = $.templates("#user-tmpl");
     var htmlOutput = template.render({
         userName : account.name ,
         publickey : account.publickey,
-        color: account.color.toString(16)
+        color: account.color.toString(16),
+        online : account.online
     });
     //  also inster it into the proper place in the list
     
     $("#users-list").html($("#users-list").html() + htmlOutput);
-    console.log(account);
+    
 
 }
 function renderAccountsTab(){
     $("#users-list").html("");
+    //  need to order the list by who is online first with a simple sort 
+    console.log("renderingAccounts Tab");
     for(var i=0;i<accounts.length;i++){
         var template = $.templates("#user-tmpl");
+        console.log( publickey );
+        if(accounts[i].publickey == publickey ){   //  if this is you then 
+            console.log("its me");
+            accounts[i].online = true;
+        }
         var htmlOutput = template.render(accounts[i]);
         //  also inster it into the proper place in the list
         console.log(accounts[i]);
@@ -302,6 +343,57 @@ function loadPastNickName(publicKey,callback){
     });
 }
 
+
+function bringAccountOnline(publickey){
+    //  first see if we have the user in our lists
+    var index = -1;
+    
+    for(var i=0;i<accounts.length;i++){
+        if(accounts[i].publickey == publickey){
+            index = i;
+            break;
+        }
+    }
+    if(index != -1){
+        //  if so we set the div to the online color 
+        getUser(publickey).online = true;
+        renderAccountsTab();
+    }else{
+        // if not we send an http request to the server to 
+        //  find out what the username is from the route 
+        //  we made ealier since it return the current one
+        getPastNicknames(publickey,(data) =>{
+            data = JSON.parse(data);
+            //  add the entry to the list and add it to
+            //  the list of users in the chat room and 
+            //  set them to online 
+            addAccount({
+                "publickey" : publickey,
+                userName : data.userNames[data.userNames.length -1].name ,  // last one is newest
+                color : data.userNames[data.userNames.length -1].color.toString(16),
+                online : true
+            });
+
+            //  send a command to rerender the account list and 
+            //  to put all off the active users on the bottom
+            renderAccountsTab();
+        });
+    }
+    
+
+}
+function bringAccountOffline(accountPublickey){
+    console.log("taking "+ JSON.stringify(accountPublickey) + " offline");
+    for(var i=0;i<accounts.length;i++){
+        console.log(accounts[i].publickey == accountPublickey);
+        if(accounts[i].publickey == accountPublickey){
+            console.log("it is offline");
+            accounts[i].online = false
+            break;
+        }
+    }
+    renderAccountsTab();
+}
 
 //  2 event for file drag and dropping 
 $('#file-drop-area').on('drag dragstart dragend dragover dragenter dragleave drop', function(e) {
