@@ -45,8 +45,7 @@ function initalizeClient(){
            
             for(var i=0;i<data.accounts.length;i++){
                 addAccount(data.accounts[i]);
-                
-                
+
                
             }
             $.post(
@@ -65,29 +64,7 @@ function initalizeClient(){
                 renderAccountsTab();
             });
             //  ask for the last 200 messages 
-            $.post("/chat/GetHistoricalMessages",{
-                roomHash : (new URL(window.location.href)).searchParams.get("roomHash"),
-                pageSize : 200,     //  how many messages to get 
-                page : 1,           //  if we have to offset to the next page
-                pageStart : (new Date).getTime()    //  so we dont double load if 
-            })                                      //  more messages are sent
-            .done(function(data){
-                data = JSON.parse(data);
-                $("#connection-loader").hide();
-                if(data.success){
-                    renderMessages(data.messages);
-                }else{
-                    Swal.fire({
-                        position: 'top-end',
-                        type: 'fail',
-                        title: 'Past Messages Could Not be Loaded',
-                        showConfirmButton: false,
-                        backdrop : false,
-                        timer: 1500
-                        })
-                    }
-                
-            });
+            
 
             //  now lets open a websockets connection to our server 
             socket = io(window.location.origin,{user:document.cookie});
@@ -109,6 +86,32 @@ function initalizeClient(){
                 }
                 renderAccountsTab();
                 console.log('message: ' + JSON.stringify(msg));
+
+                // we can load the historical messages
+                $.post("/chat/GetHistoricalMessages",{
+                    roomHash : (new URL(window.location.href)).searchParams.get("roomHash"),
+                    pageSize : 200,     //  how many messages to get 
+                    page : 1,           //  if we have to offset to the next page
+                    pageStart : (new Date).getTime()    //  so we dont double load if 
+                })                                      //  more messages are sent
+                .done(function(data){
+                    data = JSON.parse(data);
+                    $("#connection-loader").hide();
+                    if(data.success){
+                        renderMessages(data.messages);
+                        
+                    }else{
+                        Swal.fire({
+                            position: 'top-end',
+                            type: 'fail',
+                            title: 'Past Messages Could Not be Loaded',
+                            showConfirmButton: false,
+                            backdrop : false,
+                            timer: 1500
+                            })
+                        }
+                    
+                });
             });
 
             //  reciving user updates for state 
@@ -166,18 +169,42 @@ function initalizeClient(){
 }
 
 
-
+function getFormatedTimeStamp(unixTimeStamp){
+    var d = new Date(unixTimeStamp);
+    var hours = d.getHours();
+    var minutes = d.getMinutes();
+    var seconds = d.getSeconds();
+    //  before check to see if we need to add a 0 infront of it 
+    if(hours < 10){
+        hours = "" + "0" + hours.toString();
+    }
+    if(minutes < 10){
+        minutes = "" + "0" + minutes.toString();
+    }
+    if(seconds < 10){
+        seconds = "" + "0" + seconds.toString();
+    }
+    return "[" + hours + ":" + minutes + ":" + seconds + "]";
+}
 
 function addMessage(message){
     var template = $.templates("#message-tmpl");
-        var d = new Date(message.created_at);
-        var htmlOutput = template.render({
-            time :d.getHours()+":"+d.getMinutes()+":"+d.getSeconds() ,
-            user : getUser(message.publickey),
-            message: message.message
-        });
-        //  also inster it into the proper place in the list
-        $("#message-list").html($("#message-list").html() + htmlOutput);
+    var tmpldata = {
+        time :getFormatedTimeStamp(message.created_at) ,
+        user : getUser(message.publickey),
+        message: message.message
+    };
+    
+    if(message.publickey == publickey){
+        tmpldata.messageClasses = "bold";
+    }
+    var htmlOutput = template.render(tmpldata);
+    //  before we insert the message lets check to see 
+    //  also inster it into the proper place in the list
+    $("#message-list").html($("#message-list").html() + htmlOutput);
+    
+    $("#message-list").scrollTop($("#message-list").prop("scrollHeight"));
+        
 }
 
 function sendMessage(message){
@@ -194,14 +221,22 @@ function renderMessages(messageList){
         //  render it in the list 
         
         var template = $.templates("#message-tmpl");
-        var d = new Date(messageList[i].created_at);
-        var htmlOutput = template.render({
-            time :d.getHours()+":"+d.getMinutes()+":"+d.getSeconds() ,
+        var tmpldata = {
+            time :getFormatedTimeStamp(messageList[i].created_at) ,
             user : getUser(messageList[i].publickey),
             message: messageList[i].message
-        });
+            
+        };
+        //  if the message is mine add the class for bold
+        console.log(messageList[i].publickey , publickey);
+        if(messageList[i].publickey == publickey){
+            
+            tmpldata.messageClasses = "bold";
+        }
+        var htmlOutput = template.render(tmpldata);
         //  also inster it into the proper place in the list
         $("#message-list").html($("#message-list").html() + htmlOutput);
+        $("#message-list").scrollTop($("#message-list").prop("scrollHeight"));
 
     }
 }

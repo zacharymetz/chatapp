@@ -78,10 +78,10 @@
         <li>
             <div class="message">
                 <span class="message-time">{{:time}}</span> 
-                <span class="message-user" {{if user.color != null }}
+                <span class="message-user  {{:messageClasses}}" {{if user.color != null }}
                 style="color:#{{:user.color}};"
             {{/if}}>{{:user.userName}}</span>:
-                <span class="message-payload">{{:message}}</span>
+                <span class="message-payload  {{:messageClasses}} ">{{:message}}</span>
             </div>
         </li>
 

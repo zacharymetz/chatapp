@@ -6,6 +6,9 @@ color:#e5e1e3;
 font-family: 'Courier New', Courier, monospace;
 
 }
+.bold{
+  font-weight: 1000;
+}
 .top-wrapper{
 display: flex;  
 flex-flow: row wrap;
