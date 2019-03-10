@@ -3,6 +3,7 @@ const nunjucks = require('nunjucks');
 const db = require('./db');
 const generator = require('./controllers/helpers/generators');
 const bodyParser = require('body-parser');
+var cookie = require('cookie');
 var URL = require('url').URL;
 
 const app = express();
@@ -61,6 +62,7 @@ function addUser(publickey,id){
   }
   console.log(onlineUsers);
 }
+
 function removeUser(id){
   //  go though the 2d list 
   var i;
@@ -76,14 +78,13 @@ function removeUser(id){
       }
     }
   }
+  console.log(found);
   if(found){
-    if(onlineUsers[i -1].ids.length > 1){  // remove the id from the 
-      onlineUsers[i - 1].ids.splice(j-1,1);
-    }else{  // remove the object from the list 
+     // remove the object from the list 
       onlineUsers.splice(i-1, 1);
       return returnKey;
       
-    }
+    
   }
 }
 function getConnectAccounts(){
@@ -97,7 +98,9 @@ function getConnectAccounts(){
 
 
 io.on('connection', function(socket){
-  var userPrivateKey = socket.handshake.headers.cookie.split(";")[0]
+  var cookies = cookie.parse(socket.handshake.headers.cookie);
+  var userPrivateKey = cookies.privatekey;
+  console.log(cookies);
   //  do a qquire here to set the users state to online and send an emit a message
   sql = "INSERT INTO public.account_chatroom( accountid, chatroomid, date_joined) VALUES ( (Select accountid from account where publickey = $1),(select chatroomid from chatroom where hash = $2) , now());"
   //  now we need to return a list of all of the users in the the chat room and 

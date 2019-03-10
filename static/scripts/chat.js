@@ -16,58 +16,40 @@ $(document).ready(function(){
         }
     });
 
-    $('#message-text').on('keyup', function() {
-        if (this.value.length > 1) {
-             // do search for this.value here
-             typingStart();
-        }
-   });
-})
-  
+    
+});
+function createCookie(name,value,days) {
+	if (days) {
+		var date = new Date();
+		date.setTime(date.getTime()+(days*24*60*60*1000));
+		var expires = "; expires="+date.toGMTString();
+	}
+	else var expires = "";
+	document.cookie = name+"="+value+expires+"; path=/";
+}
+function readCookie(name) {
+	var nameEQ = name + "=";
+	var ca = document.cookie.split(';');
+	for(var i=0;i < ca.length;i++) {
+		var c = ca[i];
+		while (c.charAt(0)==' ') c = c.substring(1,c.length);
+		if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+	}
+	return null;
+}
 function initalizeClient(){
     //  get the room hash to figure out 
     messages = [];  // initalize the messages list 
     accounts = [];
-    if(document.cookie != ""){
+    if(readCookie("privatekey") != null){
 
-        $.post("/chat/GetChatRoomUsers",{
-            roomHash : (new URL(window.location.href)).searchParams.get("roomHash"),
-            pageSize : 200,     //  how many messages to get 
-            page : 1,           //  if we have to offset to the next page
-            pageStart : (new Date).getTime()    //  so we dont double load if 
-        })                                      //  more messages are sent
-        .done(function(data){
-            
-            data = JSON.parse(data);
-            //  add the users to the user list and the page 
-            console.log(data);
-            //  lets snag our public key 
-           
-            for(var i=0;i<data.accounts.length;i++){
-                addAccount(data.accounts[i]);
-
-               
-            }
-            $.post(
-                "/getOnlineUsers"
-            ).done((data)=>{
-                data = JSON.parse(data);
-                //  run through all of the online users and set them to online
-                console.log(data.users);
-                for(var i=0;i<data.users.length;i++){
-                    if(getUser(data.users[i]) != null){
-                        console.log("Setting to online");
-                        getUser(data.users[i]).online = true;
-                    }
-                }
-                //  rerender the accoutnsTab
-                renderAccountsTab();
-            });
+        
             //  ask for the last 200 messages 
             
 
             //  now lets open a websockets connection to our server 
-            socket = io(window.location.origin,{user:document.cookie});
+            socket = io(window.location.origin,{user:readCookie("privatekey")});
+            
             
             //  reciving chat messages handler 
             socket.on('chat message', function(msg){
@@ -76,14 +58,51 @@ function initalizeClient(){
             });
             socket.on('hash', function(msg){
                 publickey = msg
-                for(var i=0;i<accounts.length;i++){
-                    //  if we find our account lets set our user stuff 
-                    console.log(accounts[i].color );
-                    if(accounts[i].publickey == publickey){
-                        $("#current-user").html(accounts[i].userName);
-                        $("#current-user").css( "color", "#" +accounts[i].color );
+                $.post("/chat/GetChatRoomUsers",{
+                    roomHash : (new URL(window.location.href)).searchParams.get("roomHash"),
+                    pageSize : 200,     //  how many messages to get 
+                    page : 1,           //  if we have to offset to the next page
+                    pageStart : (new Date).getTime()    //  so we dont double load if 
+                })                                      //  more messages are sent
+                .done(function(data){
+                    
+                    data = JSON.parse(data);
+                    //  add the users to the user list and the page
+                    //  lets snag our public key 
+                   
+                    for(var i=0;i<data.accounts.length;i++){
+                        addAccount(data.accounts[i]);
+        
+                       
                     }
-                }
+                    for(var i=0;i<accounts.length;i++){
+                        //  if we find our account lets set our user stuff 
+                        if(accounts[i].publickey == publickey){
+                            $("#current-user").html(accounts[i].userName);
+                            $("#current-user").css( "color", "#" +accounts[i].color );
+                            found = true;
+                        }
+                        
+                    }
+                    $.post(
+                        "/getOnlineUsers"
+                    ).done((data)=>{
+                        data = JSON.parse(data);
+                        //  run through all of the online users and set them to online
+                        
+                        for(var i=0;i<data.users.length;i++){
+                            if(getUser(data.users[i]) != null){
+                                console.log("Setting to online");
+                                getUser(data.users[i]).online = true;
+                            }
+                        }
+                        //  rerender the accoutnsTab
+                        renderAccountsTab();
+                    });
+                
+                console.log("found :", found);
+                //  if my account was not found in there then we need to ask the server for it 
+                //  and add it 
                 renderAccountsTab();
                 console.log('message: ' + JSON.stringify(msg));
 
@@ -122,7 +141,6 @@ function initalizeClient(){
                     //  go thought the users and find the same hash then replace it with the the new one and rerender the user list 
                     var i;
                     for(i=0;i<accounts.length;i++){
-                        console.log(accounts[i].userPublicKey);
                             console.log(msg.publickey);
                         if(accounts[i].publickey == msg.publickey){
                             
@@ -157,11 +175,12 @@ function initalizeClient(){
     }else{  //  there is not a valid cookie so we need to get a new account 
             //  and then call itselft again so we can start the inializtation
             //  again
+            console.log("Getting a new account");
             $.post("/chat/NewAccount")
             .then((data) => {
                 data = JSON.parse(data);
                 //  set the cookie 
-                document.cookie = data.privatekey;
+                createCookie("privatekey",data.privatekey,1000);
                 initalizeClient();
             });
 
@@ -209,7 +228,7 @@ function addMessage(message){
 
 function sendMessage(message){
     // add message to the messages list 
-    socket.emit('chat message', JSON.stringify({ "message" : message, "userKey" : document.cookie, "roomHash":(new URL(window.location.href)).searchParams.get("roomHash") }));
+    socket.emit('chat message', JSON.stringify({ "message" : message, "userKey" : readCookie("privatekey"), "roomHash":(new URL(window.location.href)).searchParams.get("roomHash") }));
 }
 //  take in a message list and add them in to the correct spot on the list and the message 
 //  internal list if i want to
@@ -228,7 +247,6 @@ function renderMessages(messageList){
             
         };
         //  if the message is mine add the class for bold
-        console.log(messageList[i].publickey , publickey);
         if(messageList[i].publickey == publickey){
             
             tmpldata.messageClasses = "bold";
@@ -242,14 +260,16 @@ function renderMessages(messageList){
 }
 
 function addAccount(account){
-    console.log(account.publickey);
-    
+    //should do a check to see if we they gave us a usernmane 
+    if(account.online == null){
+        account.online = false
+    }
     
     accounts.push({
         publickey : account.publickey,
         userName : account.name ,
         color : account.color.toString(16),
-        online : false
+        online : account.online
     });
     var template = $.templates("#user-tmpl");
     var htmlOutput = template.render({
@@ -260,28 +280,33 @@ function addAccount(account){
     });
     //  also inster it into the proper place in the list
     
-    $("#users-list").html($("#users-list").html() + htmlOutput);
+    $("#users-list").html(htmlOutput + $("#users-list").html() );
     
 
 }
 function renderAccountsTab(){
+    //  sort the accounts tab 
+    accounts.sort(function(x, y) {
+        // true values first
+        return (x.online === y.online)? 0 : x.online? 1 : -1;
+    });
     $("#users-list").html("");
     //  need to order the list by who is online first with a simple sort 
     console.log("renderingAccounts Tab");
     for(var i=0;i<accounts.length;i++){
         var template = $.templates("#user-tmpl");
-        console.log( publickey );
         if(accounts[i].publickey == publickey ){   //  if this is you then 
             console.log("its me");
             accounts[i].online = true;
         }
         var htmlOutput = template.render(accounts[i]);
         //  also inster it into the proper place in the list
-        console.log(accounts[i]);
         
-        $("#users-list").html($("#users-list").html() + htmlOutput);
+        $("#users-list").html(   $("#users-list").html() + htmlOutput);
     }
+    $("#users-list").scrollTop($("#users-list").prop("scrollHeight"));
 }
+
 function getUser(publickey){
     for(var i=0;i<accounts.length;i++){
         if(publickey == accounts[i].publickey){
@@ -310,7 +335,7 @@ function typingStart(){
                                 //  and should send a message saying we are typing 
         socket.emit('account state',JSON.stringify({
             typing : true,
-            userPrivateKey: document.cookie
+            userPrivateKey: readCookie("privatekey")
         }));
         
     }else{
@@ -320,7 +345,7 @@ function typingStart(){
     typingTimeout = setTimeout(function(){
         socket.emit('account state',JSON.stringify({
             typing : false,
-            userPrivateKey: document.cookie
+            userPrivateKey: readCookie("privatekey")
         }));
         typingTimeout = null;
     },1000);
@@ -344,7 +369,6 @@ function updateInfoContainer(publicKey){
 
     loadPastNickName(publicKey,(data) => {
         //  hide the loading animation 
-        console.log(data);
         $("#info-container-title").html(data.userName);
         $("#info-container-pk").html(data.publickey);
         $("#past-nicknames").html("");
@@ -382,13 +406,16 @@ function loadPastNickName(publicKey,callback){
 function bringAccountOnline(publickey){
     //  first see if we have the user in our lists
     var index = -1;
-    
+    console.log("brigning account online");
     for(var i=0;i<accounts.length;i++){
         if(accounts[i].publickey == publickey){
             index = i;
             break;
         }
     }
+
+    console.log(index);
+    
     if(index != -1){
         //  if so we set the div to the online color 
         getUser(publickey).online = true;
@@ -397,17 +424,23 @@ function bringAccountOnline(publickey){
         // if not we send an http request to the server to 
         //  find out what the username is from the route 
         //  we made ealier since it return the current one
+        console.log("Getting the new person's username");
         getPastNicknames(publickey,(data) =>{
             data = JSON.parse(data);
             //  add the entry to the list and add it to
             //  the list of users in the chat room and 
             //  set them to online 
-            addAccount({
+            console.log(data.userNames[data.userNames.length -1].name);
+            var newAccount = {
                 "publickey" : publickey,
-                userName : data.userNames[data.userNames.length -1].name ,  // last one is newest
+                name : data.userNames[data.userNames.length -1].name ,  // last one is newest
                 color : data.userNames[data.userNames.length -1].color.toString(16),
                 online : true
-            });
+            };
+            addAccount(newAccount);
+            console.log(newAccount);
+            
+            console.log(accounts);
 
             //  send a command to rerender the account list and 
             //  to put all off the active users on the bottom
@@ -420,7 +453,6 @@ function bringAccountOnline(publickey){
 function bringAccountOffline(accountPublickey){
     console.log("taking "+ JSON.stringify(accountPublickey) + " offline");
     for(var i=0;i<accounts.length;i++){
-        console.log(accounts[i].publickey == accountPublickey);
         if(accounts[i].publickey == accountPublickey){
             console.log("it is offline");
             accounts[i].online = false

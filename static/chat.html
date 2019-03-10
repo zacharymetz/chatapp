@@ -97,6 +97,7 @@
                 style="color:#{{:color}};"
             {{/if}} >
             {{:userName}}
+            {{if online != null }}
             <div class="online-indicator 
             {{if online}}
             online
@@ -104,6 +105,7 @@
             offline
             {{/if}}
             " id="account-online-{{:publickey}}"></div>
+            {{/if}}
         </li>
     </script>
   </body>
