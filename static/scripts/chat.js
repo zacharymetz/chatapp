@@ -217,10 +217,16 @@ function getFormatedTimeStamp(unixTimeStamp){
 }
 
 function addMessage(message){
+    var user;
+    if(message.publickey == null){
+        user = message.user;
+    }else{
+        user = getUser(message.publickey);
+    }
     var template = $.templates("#message-tmpl");
     var tmpldata = {
-        time :getFormatedTimeStamp(message.created_at) ,
-        user : getUser(message.publickey),
+        time : getFormatedTimeStamp(message.created_at) ,
+        user : user,
         message: message.message
     };
     
