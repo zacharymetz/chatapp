@@ -164,6 +164,16 @@ function initalizeClient(){
                     
                 }
             });
+            socket.on('system message', function(msg){
+                console.log(msg);
+                addMessage({
+                    "created_at" :(new Date()).getTime() ,
+                    "user" :{
+                        userName : "SYSTEM"
+                    },
+                    "message": msg
+                });
+             });
 
 
             //  send a message to the server requesting a list of online users 

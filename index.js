@@ -145,7 +145,7 @@ io.on('connection', function(socket){
         db.query(sql,sql_options ,(err, result) => {
           if(err){
             console.log(err);
-            
+            socket.emit('system message', "That user Name is not unique, please try another one");
           }else{
             console.log(body.roomHash);
             io.to(body.roomHash).emit('account state', {
@@ -156,6 +156,7 @@ io.on('connection', function(socket){
             });
             console.log('message: ' + msg);
         }});
+        
       }else if(command == "nickcolor"){
         //  update the nick name color for the current nick name 
         var sql = "UPDATE public.nickname SET  color= $1 WHERE nicknameid =  (select nicknameid from nickname where accountid = (select accountid from account where publickey = $2) order by created_at DESC  limit 1 ) RETURNING *;";
@@ -168,7 +169,8 @@ io.on('connection', function(socket){
             io.to(body.roomHash).emit('account state', {
               publickey : generator.getPublicKey( body.userKey),
               newNickName : result.rows[0].name,
-              newColor : result.rows[0].color
+              newColor : result.rows[0].color,
+              type : "nicknamechange"
             });
           }});
         
