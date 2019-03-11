@@ -6,7 +6,6 @@ var crypto = require('crypto'), shasum = crypto.createHash('sha1');
 const express = require('express');
 var queryBuilder = require('./helpers/queryBuilder');
 var generators = require('./helpers/generators');
-var googleStorage = require('./helpers/gcupload');
 var router = express.Router();
 var multer  = require('multer');
 var upload = multer()
@@ -180,86 +179,4 @@ router.post('/GetPastUserNames', (req, res) => {
   });
 });
 
-router.post('/postcontent/:roomHash',upload.any(), (req, res) => {
-  //  run a query to see 
-  //    if the file type is valid 
-  //    if the filesize is wihin the contriaint 
-  //    and if the user and room are real 
-  for(var i=0;i<req.files.length;i++){
-
-  
-    var sql = "SELECT"; 
-    /*See if the user exists*/
-    sql += " exists(select accountid from account where publickey = $1) ";
-    /* See if the room exists */
-    sql += "and exists(select chatroomid from chatroom where hash = $2) ";
-    /* see if the mimetype is accepted and that the file size is under */
-    
-    
-    /* get the mimefiletype and its newest max file size  */
-    sql += "and exists(select * from mimefiletype inner join mimetype on mimefiletype.mimetypeid = mimetype.mimetypeid  ";
-    sql += "where mimetype.mimetype = $3 and $4 <= (select sizeinbytes from maxfilesize where maxfilesize.maxfilesizeid = mimefiletype.maxfilesizeid));";
-    var sql_options = [generators.getPublicKey(req.header('Cookie').split(";")[0]),req.params.roomHash,req.files[i].mimetype,req.files[i].size];
-    
-    db.query(sql,sql_options, (err,result) =>{
-      
-      if(err){
-        res.send(JSON.stringify({
-              success : false,
-              message : err
-            }));
-      }else{
-        
-        if(result.rows[0]['?column?']){ //  make sure the file is within the constraints
-          
-        //  now we need to upload the file to google cloud
-        console.log(i);
-          googleStorage.sendUploadToGCS(req.files[i-1], (err)=>{
-            if(err){
-              console.log(err);
-              res.send(JSON.stringify({
-                success : false,
-                message : "Error uploading file to storage"
-              }));
-            }else{
-              //  its been uploaded to google cloud now we can 
-              //  save it in the database aswell as create a new 
-              //  message using the public key, roomHash, and messagemedia that can be sent to the room roomhash
-  
-              var message_sql ="";
-              var message_sql_options = [];
-              db.query(message_sql,message_sql_options,(result,err) => {
-                if(err){
-                  res.send(JSON.stringify({
-                  success : false,
-                  message : "There was an error sending the message, please try again."
-                }));
-                }else{
-                  //  send it to the chat messages channel with the room hash given 
-  
-                  res.send(JSON.stringify({
-                  success : true,
-                  message : "Upload Sucessful"
-                }));
-                }
-              });
-            }
-          });
-        }else{  //  
-          res.send(JSON.stringify({
-            success : false,
-            message : "Your file Type was invalid or the file size was too large"
-          }));
-        }
-        
-      }
-    });
-  
-  };
-  //  if its good then start the upload save it to the database 
-  //  return a true and update the rooms messages 
-
-  //  if not just return false maybe with a helpful error message 
-
-});
 module.exports = router;

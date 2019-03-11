@@ -151,7 +151,8 @@ io.on('connection', function(socket){
             io.to(body.roomHash).emit('account state', {
               publickey : generator.getPublicKey( body.userKey),
               newNickName : result.rows[0].name,
-              newColor : result.rows[0].color
+              newColor : result.rows[0].color,
+              type : "nicknamechange"
             });
             console.log('message: ' + msg);
         }});

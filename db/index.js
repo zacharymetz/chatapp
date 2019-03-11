@@ -5,7 +5,7 @@ const pool = new Client({
   user: 'postgres',
   host: '96.51.140.32',
   database: 'chatapp',
-  password: 'KEoybBQt0DzprEkqllCSJRKjiNoyZ6JiKsbG5qmUXbRxnu2Og3YvscwO09Fy',
+  password: 'passowrd',
   port: 5432,
 });
 

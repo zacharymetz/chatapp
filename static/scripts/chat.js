@@ -143,13 +143,13 @@ function initalizeClient(){
                     for(i=0;i<accounts.length;i++){
                             console.log(msg.publickey);
                         if(accounts[i].publickey == msg.publickey){
-                            
+                            accounts[i].userName = msg.newNickName;
+                            accounts[i].color = msg.newColor.toString(16);
                             break;
                         }
                     }
                     //  now we can replace the ith nick name and rerender the users 
-                    accounts[i].userName = msg.newNickName;
-                    accounts[i].color = msg.newColor.toString(16);
+                    
                     renderAccountsTab();
                     console.log(msg);
                 }else if(msg.type == "userConnected"){
