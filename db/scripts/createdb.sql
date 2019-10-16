@@ -28,6 +28,7 @@ Create Table message(
 	created_by int REFERENCES account(accountid),
 	created_in int REFERENCES chatroom(chatroomid),
 	message text not null,
+	data jsonb default '{}',
 	created_at timestamp with time zone not null
 );
 
