@@ -248,4 +248,4 @@ io.on('connection', function(socket){
 });
 
 //listen at 3000
-http.listen(3000, () => console.log('server started'));
+http.listen(3000, () => console.log(db));

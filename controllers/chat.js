@@ -2,7 +2,7 @@
 Customer Module
 */
 const db = require('../db');
-var crypto = require('crypto'), shasum = crypto.createHash('sha1');
+var crypto = require('crypto');
 const express = require('express');
 var queryBuilder = require('./helpers/queryBuilder');
 var generators = require('./helpers/generators');
@@ -67,7 +67,7 @@ router.post('/NewChatRoom', (req, res) => {
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   for (var i = 0; i < 32; i++)
     roomHash += possible.charAt(Math.floor(Math.random() * possible.length));
-  
+  let shasum = crypto.createHash('sha1');
   var query_options = [req.body.name,shasum.update(roomHash).digest('hex')];
   db.query(sql,query_options ,(err, result) => {
     if(err){
