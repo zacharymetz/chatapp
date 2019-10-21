@@ -15,6 +15,24 @@ $(document).ready(function(){
             $("#message-text").val("");
         }
     });
+    $("#new-question-btn").click(()=>{
+        openNewQuestionDialog();
+    });
+    //   sure 
+    $( ".widget input[type=submit], .widget a, .widget button" ).button();
+    document.addEventListener('keydown', (event) => {
+        const keyName = event.key;
+      
+        if (keyName === 'Enter' && $("#message-text").is(":focus")) {
+          // do not alert when only Control key is pressed.
+          $("#send-btn").trigger( "click" );
+          return;
+        }
+      
+        
+      }, false);
+      
+     
 
     
 });
@@ -236,7 +254,7 @@ function addMessage(message){
     var htmlOutput = template.render(tmpldata);
     //  before we insert the message lets check to see 
     //  also inster it into the proper place in the list
-    $("#message-list").html($("#message-list").html() + htmlOutput);
+    $("#message-list").append( htmlOutput);
     
     $("#message-list").scrollTop($("#message-list").prop("scrollHeight"));
         
@@ -252,26 +270,45 @@ function renderMessages(messageList){
     //  go thought the list backwards to add it to the list 
     for(var i=0;i<messageList.length;i++){
         //  add the messsages to the message list 
-        messages.push(messageList[i]);
-        //  render it in the list 
-        
-        var template = $.templates("#message-tmpl");
-        var tmpldata = {
-            time :getFormatedTimeStamp(messageList[i].created_at) ,
-            user : getUser(messageList[i].publickey),
-            message: messageList[i].message
-            
-        };
-        //  if the message is mine add the class for bold
-        if(messageList[i].publickey == publickey){
-            
-            tmpldata.messageClasses = "bold";
-        }
-        var htmlOutput = template.render(tmpldata);
-        //  also inster it into the proper place in the list
-        $("#message-list").html($("#message-list").html() + htmlOutput);
-        $("#message-list").scrollTop($("#message-list").prop("scrollHeight"));
 
+        // make sure that the message does not exists in the messages already 
+        if(!messages.map(x => x.messageid).includes(messageList[i].messageid)){
+            var template = $.templates("#message-tmpl");
+            var tmpldata = {
+                time :getFormatedTimeStamp(messageList[i].created_at) ,
+                user : getUser(messageList[i].publickey),
+                message: messageList[i].message
+                
+            };
+            //  if the message is mine add the class for bold
+            if(messageList[i].publickey == publickey){
+                
+                tmpldata.messageClasses = "bold";
+            }
+            var htmlOutput = template.render(tmpldata);
+            //  we gotta put it in the right place as well 
+            let added = false;
+            for(let j in messages){
+                if(messages[j].created_at >messageList[i].created_at){
+                    added = true;
+                    //  need to splice it in here 
+                    messages.insert(j, messageList[i]);
+                    $(htmlOutput).insertBefore($($("#message-list").children()[j]))
+                }
+            }
+            //  if it wasnt added before we need to add it to the bottom 
+            if(!added){
+                messages.push(messageList[i]);
+                $("#message-list").append(htmlOutput);
+
+            }
+            
+            
+           
+            //  also inster it into the proper place in the list
+           
+            $("#message-list").scrollTop($("#message-list").prop("scrollHeight"));
+        }
     }
 }
 
@@ -296,7 +333,7 @@ function addAccount(account){
     });
     //  also inster it into the proper place in the list
     
-    $("#users-list").html(htmlOutput + $("#users-list").html() );
+    $("#users-list").append( $("#users-list").html() );
     
 
 }

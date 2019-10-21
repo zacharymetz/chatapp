@@ -7,6 +7,8 @@
     <!-- Can template in things here like the name of the chat room-->
     <title>Chat Room</title>
     <script src="/static/lib/jquery.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="/static/lib/jsrender.js"></script>
     <script src="/static/lib/swal2.js"></script>
     <script src="/static/lib/jscolor.js"></script>
@@ -27,27 +29,7 @@
 
         </div>
       </div>
-      <div class="users-container">
-          <div class="" id="info-container-title">Room Info</div>
-          <div class="info-hash"><span style="padding-left: 1.25rem;"></span>Public Key: <br><span id="info-container-pk">688A598AFF3455FA2ED34656F58D7D927C475368</span></div>
-          <div >Past Nicknames:</div>
-          <div class="inner-box metadata-info">
-              
-              
-              <ul class="" id="past-nicknames">
-                  
-                
-              </ul>
-    
-          </div>
-        <div class="">Users</div>
-        <div class="inner-box">
-            <ul class="inverted-list" id="users-list">
-                
-            </ul>
-          
-        </div>
-      </div>
+      
 
     
       
@@ -60,6 +42,7 @@
         </div>
         <input type="hidden" class="jscolor" id="color-area">
         <input type="text" class="message-box-textarea" id="message-text">
+        <button class="send-message" id="new-question-btn" >+</button>
         <button class="send-message" id="send-btn">Send</button>
       </div>
     </div>
@@ -71,8 +54,58 @@
         </div>
       </div>
     </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!-- All the app code goes down here-->
+    <script src="/static/scripts/question.js"></script>
     <script src="/static/scripts/chat.js"></script>
 
+
+
+    <!-- this is the new multiple choice question window -->
+    <div id="newQuestionDialog" title="New Question" style="display: none;"> 
+      <div id="tabs">
+        <ul>
+          <li><a href="#tabs-1">Multiple Choice</a></li>
+          
+        </ul>
+        <div id="tabs-1" class="new-question-content">
+          <h4>Question Body:</h4>
+         <div style="display: flex;align-items: center;margin-bottom:0.5rem;">
+           <label for="new-mc-body" style="margin-right:1rem;" >Question :</label>
+           <input type="text" id="new-mc-question-body" style="flex-grow: 1">
+         </div>
+         <div style="display: flex;align-items: center">
+          <label for="new-mc-body" style="margin-right:1rem;" >Image (optional) :</label>
+          <input type="file" id="new-mc-question-image" style="flex-grow: 1">
+        </div>
+         <h4>Differnt Choices:</h4>
+         <div id="mc-choices">
+          
+         </div>
+         <div class="widget" style="margin-top:1rem;text-align: right">
+          <button onclick="addNewMcChoice()">Add Choice</button>
+         </div>
+         <div class="widget" style="margin-top:1rem;text-align: right">
+            <button onclick="CreateNewMcQuestion()">Create Question</button>
+           </div>
+        </div>
+        
+      </div>
+    </div>
     <!-- Templates Down Bellow -->
     <script id="message-tmpl" type="text/x-jsrender">
         <li>
