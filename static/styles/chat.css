@@ -313,3 +313,14 @@ position: relative;
 .question-title{
   margin-top:0;
 }
+.ui-widget-header{
+  border:none;
+  background:white;
+}
+.ui-tabs-nav{
+  padding-left:1rem!important;
+}
+.ui-tabs .ui-tabs-nav li {
+  border-bottom-width: 1px!important ;
+  border-radius: 3px;
+}
