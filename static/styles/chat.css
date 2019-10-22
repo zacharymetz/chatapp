@@ -4,7 +4,9 @@ padding:0;
 background:#413f46;
 color:#e5e1e3;
 font-family: 'Courier New', Courier, monospace;
-
+display:flex;
+flex-direction: column;
+height:100vh;
 }
 .bold{
   font-weight: 1000;
@@ -13,7 +15,7 @@ font-family: 'Courier New', Courier, monospace;
 display: flex;  
 flex-flow: row wrap;
 align-items: stretch;
-height:calc( 100vh - 4rem);
+flex-grow:1;
 }
 .messages-container{
 flex: 1 ;
@@ -67,21 +69,69 @@ flex-direction: column;
   z-index:10000;
 }
 .message-box-wrapper{
-height:4rem;
-padding:0 1rem;
+  
 }
 .message-box{
-display:flex;
-padding:0.5rem;
+  display:flex;
+  padding:0.5rem;
 
 
+}
+#current-user{
+  flex-grow: 1;
+  text-align: right;
+  margin-right:0.5rem;
+}
+.title-text{
+  margin-right:1rem;
 }
 .container-title{
   padding:0.35rem;
 padding-left:1rem;
 font-weight: 800;
 border-bottom: 1px solid rgb(0,0,0,0.3);
+display: flex;
+align-items:center;
+
 }
+.filter-btn{
+  font-weight: 600;
+  padding:0.3rem 0.5rem;
+  background-color:#6b656a;
+  margin:0 0.25rem; 
+  cursor:pointer;
+  border-radius: 3px;
+  font-size:0.75rem;
+}
+.menu-icon{
+  background-image :url('/static/img/list.svg');
+    background-size: contain;
+    background-position: center; 
+    background-repeat: no-repeat;
+    height:1rem;
+    width:1rem;
+    margin-right:0.5rem;
+    cursor:pointer;
+}
+.settings-icon{
+  background-image :url('/static/img/gear.svg');
+    background-size: contain;
+    background-position: center; 
+    background-repeat: no-repeat;
+    height:1rem;
+    width:1rem;
+    margin-right:0.25rem;
+    cursor:pointer;
+    
+}
+.filter-btn:hover{
+  margin-top:-2px;
+}
+.filter-btn-active{
+  color:#6b656a;
+  background-color:#e5e1e3; 
+}
+
 .inner-box{
 
 position: relative;
@@ -157,7 +207,7 @@ position: relative;
     overflow-y: scroll;
     max-height: 100%;
 }
-#send-btn{
+.send-btn{
     all: unset;
     font-weight: 700;
     border: 1px solid transparent;
@@ -170,11 +220,12 @@ position: relative;
     
     color:black;
     margin:0 0.5rem;
+    margin-right:0;
     display: inline-block;
 }
 
 ::-webkit-scrollbar {
-    width: 0.4rem;
+    width: 0.2rem;
   }
   
   /* Track */

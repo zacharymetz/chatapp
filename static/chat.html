@@ -18,7 +18,24 @@
   <body>
     <div class="top-wrapper">
       <div class="messages-container">
-        <div class="container-title">You are <span id="current-user"></span></div>
+        <div class="container-title">
+          <div class="menu-icon"></div>
+          <div class="title-text">
+              CPSC 413
+          </div>
+          
+          <div class="filter-btn filter-btn-active">
+            Disscusion Messages
+          </div>
+          <div class="filter-btn filter-btn-active">
+            Questions
+          </div>
+          <div class="filter-btn">
+            Announcments
+          </div>
+          <div id="current-user"></div>
+          <div class="settings-icon"></div>
+        </div>
         
         <div class="inner-box">
             <ul class="inverted-list" id="message-list">
@@ -42,8 +59,8 @@
         </div>
         <input type="hidden" class="jscolor" id="color-area">
         <input type="text" class="message-box-textarea" id="message-text">
-        <button class="send-message" id="new-question-btn" >+</button>
-        <button class="send-message" id="send-btn">Send</button>
+        <button class="send-btn"  id="new-question-btn" style="margin-right:0;" >+</button>
+        <button class="send-btn" id="send-btn">Send</button>
       </div>
     </div>
     <div class="loader-overlay" id="connection-loader">
