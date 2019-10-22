@@ -27,12 +27,12 @@ display:flex;
 flex-direction: column;
 }
 .users-container{
-flex: 1 ;
-padding-left:0.25rem;
-padding:0.5rem;
-max-width:200px;
-display:flex;
-flex-direction: column;
+  flex: 1 ;
+  padding-left:0.25rem;
+  padding:0.5rem;
+  max-width:200px;
+  display:flex;
+  flex-direction: column;
 
 
 }
@@ -87,11 +87,11 @@ flex-direction: column;
 }
 .container-title{
   padding:0.35rem;
-padding-left:1rem;
-font-weight: 800;
-border-bottom: 1px solid rgb(0,0,0,0.3);
-display: flex;
-align-items:center;
+  padding-left:1rem;
+  font-weight: 800;
+  border-bottom: 1px solid rgb(0,0,0,0.3);
+  display: flex;
+  align-items: center;
 
 }
 .filter-btn{
@@ -125,7 +125,7 @@ align-items:center;
     
 }
 .filter-btn:hover{
-  margin-top:-2px;
+  margin-bottom:-2px;
 }
 .filter-btn-active{
   color:#6b656a;
@@ -137,7 +137,7 @@ align-items:center;
 position: relative;
 flex:1 1 auto;
 position:relative;
-
+overflow-x: hidden;
 }
 .info-hash{
   width:200px;
@@ -181,7 +181,9 @@ font-size:1.25rem;
 }
 
 .message{
-padding:0.25rem 0.5rem;
+  padding: 0.25rem 0.3rem;
+  margin: 0.25rem 0.5rem;
+  
 }
 .message-list li:nth-child(2n){
 background:lightgray;
@@ -191,6 +193,10 @@ border-right:0px solid black;
 padding:0.25rem 1rem;
 position: relative;
   display: inline-block;
+}
+.message-time{
+  font-size:0.75rem;
+  margin-left:-0.25rem;
 }
 
 .char-room-user:hover .past-nicknames {display: block;}
@@ -206,6 +212,7 @@ position: relative;
     width:100%;
     overflow-y: scroll;
     max-height: 100%;
+    overflow-x: hidden;
 }
 .send-btn{
     all: unset;

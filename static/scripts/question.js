@@ -1,5 +1,6 @@
 
 
+var questionManager;
 /**
  * This object will be a lef contained question 
  * where you can submit answers, get answers others have submited 
@@ -32,27 +33,16 @@ class Question{
                 "userKey" : readCookie("privatekey"),
                 "roomHash":(new URL(window.location.href)).searchParams.get("roomHash"),
                 "question" : JSON.stringify(_this)
-           })
-            $.post('/question/new',
-            {
-                 "userKey" : readCookie("privatekey"),
-                 "roomHash":(new URL(window.location.href)).searchParams.get("roomHash"),
-                 "question" : JSON.stringify(_this)
-            }).done((result)=>{
-                if(result.success){
-                    if(callback){
-                        callback(result);
-                    }
-                }else{
-                    //  there was an error creating it so lets flash the message
-                    //  and give them a little edit button ? 
-
-                }
+            });
+            let questionRequest = {
+                "question" : JSON.stringify(_this),
+                "userKey" : readCookie("privatekey"),
+                "roomHash":(new URL(window.location.href)).searchParams.get("roomHash") 
+            };
+            // questionManager.questionRequest(questionRequest,(msg)=>{
                 
-            })
-
-
-            //  callback 
+            // });
+            
             
         
         }else{
@@ -138,7 +128,66 @@ class Question{
 }
 
 
+/**
+ * 
+ */
+class QuestionManager{
+    constructor(){
+        this.inFlightRequest = [];
+    }
 
+    //  this is the socket emit thing and will be able to 
+    //  have a call back for when the ack comes in with the same id 
+
+    questionRequest(request,callback){
+        //  create an id and an inflight object to be sent 
+        let id ;
+        this.inFlightRequest.push({
+            id : id,
+            data : request,
+            callback : callback
+        });
+        //  send the request and make sure it knows what user and room its from.
+        socket.emit('question', JSON.stringify({
+            "id" :id,
+            "data" : request,
+            "userKey" : readCookie("privatekey"),
+            "roomHash":(new URL(window.location.href)).searchParams.get("roomHash") 
+        }));
+        
+
+    }
+
+    questionAck(msg){
+        let index;
+        //  look through the inlfight list to see which request it matches with 
+        for(let i in this.inFlightRequest){
+            // server will echo back same id that was send with quesiton request 
+            if(this.inFlightRequest[i].id == msg.id){
+                //  next get the object and run the call back with the data in it 
+                this.inFlightRequest[i].callback(msg);
+                index = parseInt(i);
+                break;
+            }
+        }
+
+
+        //  remove the inflight object from the list to no longer worry about it 
+        this.inFlightRequestarr.splice(index, 1); 
+        //  this is gonna be okay since we only append to the list so deleteing something 
+        //  before that shouldnt mess to much with anything
+
+    }
+
+    newQuestion(question){
+
+        //  this will trigger a new question getting created, 
+        //  added to both the messages and the questions list
+
+        //  then we will render the question in the proper place 
+
+    }
+}
 
 
 

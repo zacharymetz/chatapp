@@ -68,12 +68,29 @@ function initalizeClient(){
             //  now lets open a websockets connection to our server 
             socket = io(window.location.origin,{user:readCookie("privatekey")});
             
+            //  lets create a question manager to keep track of question 
+            //  we submit and answers that come in from the global socket 
+            questionManager = new QuestionManager();
             
             //  reciving chat messages handler 
             socket.on('chat message', function(msg){
                 addMessage(msg);
                 console.log('message: ' + JSON.stringify(msg));
             });
+
+
+            //  for reciving questions 
+            socket.on('new question',function(msg){
+                questionManager.newQuestion(JSON.stringify(msg));
+            });
+            // when ever we sumbit any kind of request in a question 
+            //  it will be tracked in the question manager 
+            //  and when it comes back the call back can be called 
+            socket.on('question ack',function(msg){
+                questionManager.questionAck(JSON.stringify(msg));
+            });
+
+
             socket.on('hash', function(msg){
                 publickey = msg
                 $.post("/chat/GetChatRoomUsers",{
@@ -231,7 +248,7 @@ function getFormatedTimeStamp(unixTimeStamp){
     if(seconds < 10){
         seconds = "" + "0" + seconds.toString();
     }
-    return "[" + hours + ":" + minutes + ":" + seconds + "]";
+    return "[" + hours + ":" + minutes +  "]";
 }
 
 function addMessage(message){
@@ -268,13 +285,21 @@ function sendMessage(message){
 //  internal list if i want to
 function renderMessages(messageList){
     //  go thought the list backwards to add it to the list 
+    let lastUser;
+    let wasLastUser = true;
+    let lastUserTime = messageList[0].created_at;
     for(var i=0;i<messageList.length;i++){
         //  add the messsages to the message list 
 
         // make sure that the message does not exists in the messages already 
         if(!messages.map(x => x.messageid).includes(messageList[i].messageid)){
+            wasLastUser = !(lastUser == getUser(messageList[i].publickey));
+            
+           
+            lastUser = getUser(messageList[i].publickey)
             var template = $.templates("#message-tmpl");
             var tmpldata = {
+                changeduser : wasLastUser,
                 time :getFormatedTimeStamp(messageList[i].created_at) ,
                 user : getUser(messageList[i].publickey),
                 message: messageList[i].message
