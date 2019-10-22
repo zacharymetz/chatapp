@@ -198,11 +198,11 @@
     /* The side navigation menu */
 .sidenav {
   height: 100%; /* 100% Full-height */
-  width: 0; /* 0 width - change this with JavaScript */
+  width: 10rem; /* 0 width - change this with JavaScript */
   position: fixed; /* Stay in place */
   z-index: 1; /* Stay on top */
   top: 0; /* Stay at the top */
-  right: 0;
+  right: -10rem;
   background-color: #202225; /* Black*/
   overflow-x: hidden; /* Disable horizontal scroll */
    /* Place content 60px from the top */
@@ -211,7 +211,7 @@
   flex-direction: column;
 }
 .sidenav-left{
-  left: 0;
+  left: -10rem;
 }
 .menu-wrapper{
   padding:1rem;
@@ -252,20 +252,20 @@
 }</style>
 <script>
 function openNav() {
-  document.getElementById("settings-menu").style.width = "25rem";
+  document.getElementById("settings-menu").style.right = "0";
 }
 
 /* Set the width of the side navigation to 0 */
 function closeNav() {
-  document.getElementById("settings-menu").style.width = "0";
+  document.getElementById("settings-menu").style.right = "-10rem";
 }
 function openMenu() {
-  document.getElementById("chat-menu").style.width = "10rem";
+  document.getElementById("chat-menu").style.left = "0";
 }
 
 /* Set the width of the side navigation to 0 */
 function closeMenu() {
-  document.getElementById("chat-menu").style.width = "0";
+  document.getElementById("chat-menu").style.left = "-10rem";
 }
 </script>
 
