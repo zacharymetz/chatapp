@@ -18,7 +18,7 @@ height:calc( 100vh - 4rem);
 .messages-container{
 flex: 1 ;
 
-padding:0.5rem;
+
 padding-right:0.25rem;
 min-height:calc(100 - 4rem);
 display:flex;
@@ -68,7 +68,7 @@ flex-direction: column;
 }
 .message-box-wrapper{
 height:4rem;
-padding:0 0.5rem;
+padding:0 1rem;
 }
 .message-box{
 display:flex;
@@ -77,8 +77,10 @@ padding:0.5rem;
 
 }
 .container-title{
+  padding:0.35rem;
 padding-left:1rem;
 font-weight: 800;
+border-bottom: 1px solid rgb(0,0,0,0.3);
 }
 .inner-box{
 
