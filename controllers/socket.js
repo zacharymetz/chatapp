@@ -37,13 +37,6 @@ function initalizeSocket(socket,io){
 
 
 
-
-
-
-
-
-
-
     //  route for sending messages 
     socket.on('chat message', newChatMessage);
 
@@ -55,6 +48,12 @@ function initalizeSocket(socket,io){
     socket.on('ping',(msg)=>{
         clientPing(msg,socket);
     });
+  
+    // for the client submitting an answer to a question
+    socket.on('question',(msg)=>{
+        questionHandler(msg,socket);
+    });
+   
 
 }
 
@@ -65,6 +64,53 @@ module.exports = initalizeSocket;
 
 //  *****************************************************************
 //  BELOW ARE FUNCTION FOR SOCKET ACTIONS
+
+function questionHandler(msg,socket){
+  let requestType = msg.type;
+  if(requestType == "new question"){
+    //  do a validation of the message question here to make 
+    //  sure its okay 
+    if(body.question){
+      //  then store it in the db 
+    let sql = "";
+    //  send the socket a yes its good message 
+    var query_options = [generator.getPublicKey( body.userKey),body.roomHash,escapeHtml(body.message),body.question];
+      db.query(sql,query_options ,(err, result) => {
+        if(err){
+          console.log(err);
+          
+        }else{
+          console.log(result);
+          result.rows[0].publickey = generator.getPublicKey( body.userKey);
+          socket.emit("questionAck",JSON.stringify({
+              id : msg.id,
+              success : true
+          }));
+          Server.io.to(body.roomHash).emit('chat message', result.rows[0]);
+          console.log("sent message");
+      }});
+    }
+
+    
+    //  emit it as a message to all of the other clients
+
+  }else if(requestType == "submit question response"){
+    //  check if the question is an mc , numeric , text, or written 
+    //  store the question answer for that user here 
+  }else if(requestType == "get question responses"){
+    //  if its multiple choice then we send back the sum that 
+    //  each time something has been chosen 
+
+    //  if its numeric or written send abck the number of times 
+    //  each unique answer has been chosen 
+
+
+    //  if there is a correct response for the question send 
+    //  that back too 
+  }
+}
+
+
 
 function newChatMessage(msg){
     var body = JSON.parse(msg);

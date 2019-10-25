@@ -30,10 +30,12 @@ var chat = require('./controllers/chat');
 var home = require('./controllers/home');
 var question = require('./controllers/question');
 app.use('/question', question);
-
-
-
 app.use('/chat', chat);
+app.use('/', home);
+
+
+//  have a simple route that will get all the online users 
+//  should move this over too a socket route tho
 app.post("/GetOnlineUsers",(req,res)=>{
   res.send(JSON.stringify({
     success : true,
@@ -41,13 +43,18 @@ app.post("/GetOnlineUsers",(req,res)=>{
     users: getConnectAccounts()
   }));
 });
-app.use('/', home);
+
 
 
 
 
 
 io.on('connection', function(socket){
+
+
+  //  should move all of this over to the socket initalization thing 
+
+
   var cookies = cookie.parse(socket.handshake.headers.cookie);
   var userPrivateKey = cookies.privatekey;
   console.log(cookies);
@@ -70,6 +77,8 @@ io.on('connection', function(socket){
 
       //  when we are down here everything is good and now its socket manipulation 
       console.log('User is online');
+
+      //  set up the socket it interact with the rest of the system 
       inializeSocket(socket,io);
       
       

@@ -296,20 +296,30 @@ function renderMessages(messageList){
             wasLastUser = !(lastUser == getUser(messageList[i].publickey));
             
            
-            lastUser = getUser(messageList[i].publickey)
-            var template = $.templates("#message-tmpl");
-            var tmpldata = {
-                changeduser : wasLastUser,
-                time :getFormatedTimeStamp(messageList[i].created_at) ,
-                user : getUser(messageList[i].publickey),
-                message: messageList[i].message
-                
-            };
-            //  if the message is mine add the class for bold
-            if(messageList[i].publickey == publickey){
-                
-                tmpldata.messageClasses = "bold";
+            lastUser = getUser(messageList[i].publickey);
+            //  set up the variables here 
+            let template;
+            let tmpldata
+            if(messageList[i].data != {} && messageList[i].data != null){
+                //  if it is something other than a strait 
+                //  chat message 
+            }else{
+                // for regular chat messages 
+                template = $.templates("#message-tmpl");
+                tmpldata = {
+                    changeduser : wasLastUser,
+                    time :getFormatedTimeStamp(messageList[i].created_at) ,
+                    user : getUser(messageList[i].publickey),
+                    message: messageList[i].message
+                    
+                };
+                //  if the message is mine add the class for bold
+                if(messageList[i].publickey == publickey){
+                    
+                    tmpldata.messageClasses = "bold";
+                }
             }
+            
             var htmlOutput = template.render(tmpldata);
             //  we gotta put it in the right place as well 
             let added = false;
@@ -328,6 +338,12 @@ function renderMessages(messageList){
 
             }
             
+            if(messageList[i].data != {} && messageList[i].data != null){
+                //  this if runs at the end to create the js object that will go into the
+                //  and run in the object that was just created
+
+                //   for questions and other interactive thread content 
+            }
             
            
             //  also inster it into the proper place in the list

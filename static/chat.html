@@ -185,12 +185,34 @@
       
       <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
       <div class="menu-wrapper">
-        <h2>Room Details</h2>
-
-        <h2>Room Settings</h2>
-
-        <h2>Notification Settings</h2>
-        <h2>Save My Details</h2>
+        <div class="settings-item">
+          <div style="margin-bottom:0.75rem;border-bottom:1px solid rgb(255,255,255,0.35);padding-bottom:0.3rem;padding-left:0.25rem;">
+            Room Users
+          </div>
+          <div class="inverted-list" id="users-list"style="position: relative;"></div>
+        </div>
+        <div class="settings-item">
+            <div style="margin-bottom:0.75rem;border-bottom:1px solid rgb(255,255,255,0.35);padding-bottom:0.3rem;padding-left:0.25rem;">
+              Report A Problem
+            </div>
+          </div>
+        <div class="settings-item" style="margin-bottom:2rem;">
+          <div style="margin-bottom:0.75rem;border-bottom:1px solid rgb(255,255,255,0.35);padding-bottom:0.3rem;padding-left:0.25rem;">
+            My Settings
+          </div>
+          <div style="margin-bottom:0.75rem;display: flex;flex-direction: row;align-items: center;font-size: 0.9rem;">
+            <input type="checkbox">  
+            <label style="margin-bottom: 0.25rem">Enable Notifications</label>
+          </div>
+          <div style="margin-bottom:0.75rem;display: flex;flex-direction: column;align-items: stretch;font-size: 0.9rem;">
+            <label style="margin-bottom: 0.25rem">UserName :</label>
+            <input class="message-box-textarea" style="padding:0.2rem 0.3rem;">
+          </div>
+          <div>
+            <button>Save</button>
+          </div>
+        </div>
+        
       </div>
 
     </div>
@@ -198,11 +220,11 @@
     /* The side navigation menu */
 .sidenav {
   height: 100%; /* 100% Full-height */
-  width: 10rem; /* 0 width - change this with JavaScript */
+  width: 15rem; /* 0 width - change this with JavaScript */
   position: fixed; /* Stay in place */
   z-index: 1; /* Stay on top */
   top: 0; /* Stay at the top */
-  right: -10rem;
+  right: -15rem;
   background-color: #202225; /* Black*/
   overflow-x: hidden; /* Disable horizontal scroll */
    /* Place content 60px from the top */
@@ -211,6 +233,7 @@
   flex-direction: column;
 }
 .sidenav-left{
+  width: 10rem; /* 0 width - change this with JavaScript */
   left: -10rem;
 }
 .menu-wrapper{
@@ -257,7 +280,7 @@ function openNav() {
 
 /* Set the width of the side navigation to 0 */
 function closeNav() {
-  document.getElementById("settings-menu").style.right = "-10rem";
+  document.getElementById("settings-menu").style.right = "-15rem";
 }
 function openMenu() {
   document.getElementById("chat-menu").style.left = "0";
