@@ -51,7 +51,8 @@ function initalizeSocket(socket,io){
   
     // for the client submitting an answer to a question
     socket.on('question',(msg)=>{
-        questionHandler(msg,socket);
+      console.log(msg)
+        questionHandler(JSON.parse(msg),socket);
     });
    
 
@@ -66,27 +67,33 @@ module.exports = initalizeSocket;
 //  BELOW ARE FUNCTION FOR SOCKET ACTIONS
 
 function questionHandler(msg,socket){
+  
   let requestType = msg.type;
   if(requestType == "new question"){
     //  do a validation of the message question here to make 
     //  sure its okay 
-    if(body.question){
+    console.log("asdasda")
+    console.log(msg.quesiton)
+    if(msg.quesiton != {}){
+      console.log("asdasda")
+      delete msg.quesiton.questionCard;
       //  then store it in the db 
-    let sql = "";
+      let sql = "INSERT INTO public.message(created_by, created_in, message,data, created_at) VALUES ( (Select accountid from account where publickey = $1), (select chatroomid from chatroom where hash = $2),$3,$4, now()) RETURNING *;";
     //  send the socket a yes its good message 
-    var query_options = [generator.getPublicKey( body.userKey),body.roomHash,escapeHtml(body.message),body.question];
+    console.log([generator.getPublicKey( msg.userKey),msg.roomHash,escapeHtml("New Question"),JSON.stringify(msg.quesiton)])
+    var query_options = [generator.getPublicKey( msg.userKey),msg.roomHash,escapeHtml("New Question"),JSON.stringify(msg.quesiton)];
       db.query(sql,query_options ,(err, result) => {
         if(err){
           console.log(err);
           
         }else{
           console.log(result);
-          result.rows[0].publickey = generator.getPublicKey( body.userKey);
+          result.rows[0].publickey = generator.getPublicKey( msg.userKey);
           socket.emit("questionAck",JSON.stringify({
               id : msg.id,
               success : true
           }));
-          Server.io.to(body.roomHash).emit('chat message', result.rows[0]);
+          Server.io.to(msg.roomHash).emit('chat message', result.rows[0]);
           console.log("sent message");
       }});
     }

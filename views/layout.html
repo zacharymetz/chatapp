@@ -4,12 +4,64 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
     <title>{% block title %}{% endblock %}</title>
-
+    <link href="/static/lib/bootstrap.css" rel="stylesheet" type="text/css" />
+    <script src="/static/lib/jquery.js"></script>
+    <script src="/static/lib/swal2.js"></script>
+    <script src="/static/lib/jsgrid.js"></script>
+    <link href="/static/lib/jsgrid.css" rel="stylesheet" type="text/css" />
+    <link href="/static/lib/jsgrid-theme.css" rel="stylesheet" type="text/css" />
     <link rel=icon href=/static/img/favicon.png>
     {% block dependancies %}{% endblock %}
   </head>
-  <body>
-    <!-- Boy Start -->
-    {% block body %}{% endblock %}
+  <body style="display:flex;flex-direction: column;min-height: 100vh;">
+    <!-- Body Start -->
+    <div>
+      <nav class="navbar navbar-dark bg-primary navbar-expand-lg ">
+        <a class="navbar-brand" href="#">
+            <img src="/static/img/brand-white.svg" width="30" height="30" class="d-inline-block align-top" alt="">
+            Coffee
+          </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item dropdown">
+              <a class="nav-link active dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Questions
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item" href="#">By Uni</a>
+                <a class="dropdown-item" href="#">By Course</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#">All</a>
+              </div>
+            </li>
+            <li class="nav-item active">
+              <a class="nav-link" href="#">About</a>
+            </li>
+            <li class="nav-item active">
+              <a class="nav-link" href="#">Get Started</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="#">Moderation</a>
+              </li>
+            
+            
+          </ul>
+          <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="search" placeholder="Search Repository" aria-label="Search">
+            <button class="btn btn-success my-2 my-sm-0" type="submit">Search</button>
+          </form>
+        </div>
+      </nav> 
+    </div>
+    <div style="flex-grow:1;display:flex;flex-direction: column;">
+      {% block body %}
+
+      {% endblock %}
+    </div>
+    
   </body>
 </html>

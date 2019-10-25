@@ -303,6 +303,7 @@ function renderMessages(messageList){
             if(messageList[i].data != {} && messageList[i].data != null){
                 //  if it is something other than a strait 
                 //  chat message 
+                console.log("ASDASDASDASDASD")
             }else{
                 // for regular chat messages 
                 template = $.templates("#message-tmpl");

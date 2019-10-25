@@ -148,12 +148,11 @@ class QuestionManager{
             callback : callback
         });
         //  send the request and make sure it knows what user and room its from.
-        socket.emit('question', JSON.stringify({
-            "id" :id,
-            "data" : request,
-            "userKey" : readCookie("privatekey"),
-            "roomHash":(new URL(window.location.href)).searchParams.get("roomHash") 
-        }));
+        request.id = id;
+        request.userKey =readCookie("privatekey");
+        request.roomHash =(new URL(window.location.href)).searchParams.get("roomHash");
+        
+        socket.emit('question', JSON.stringify(request));
         
 
     }
@@ -284,6 +283,14 @@ function CreateNewMcQuestion(){
             answerIndex : answerIndex
         });
         question.render($("#message-list"));
+
+        // send the message to the server to be saved 
+        questionManager.questionRequest({
+            type : 'new question',
+            quesiton : question
+        },(msg)=>{
+            //   here we need to validate the message
+        });
         //  close the dialog box 
         $( "#newQuestionDialog" ).dialog('close');
 }
