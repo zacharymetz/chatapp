@@ -1,0 +1,50 @@
+.brand{
+    background-image: url(/static/img/brand-blue.svg);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    height: 3.5rem;
+    width:3.5rem;
+    margin-right:0.5rem;
+  }
+  .content{
+     font-size:3rem;
+     display   :flex;
+     flex-direction:column;
+     justify-content: center;
+     margin:5rem 0 3rem 0;
+    color:#007bff;
+    text-align: center;
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+  }
+  
+  .wrap{
+    
+  }
+  
+  .typewrite > .wrap { 
+    border-right: 2px solid #007bff;
+    padding-right:2px;
+    height:3rem;
+    line-height: 1;
+    animation: blink 1s linear infinite;
+    }
+  
+  .typewrite {
+    align-self: stretch;
+    display:flex;
+    align-items: center}
+  
+  
+  
+  
+  @keyframes blink{
+    0%{ border-right: 2px solid rgba(0, 123, 255, 1);}
+    50%{ border-right: 2px solid rgb(0, 123, 255,0);}
+    100%{ border-right: 2px solid rgb(0, 123, 255,1);}
+  }
+
+
+.room-list{
+    padding:2rem 0;
+}

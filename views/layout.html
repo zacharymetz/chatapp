@@ -4,20 +4,23 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
     <title>{% block title %}{% endblock %}</title>
-    <link href="/static/lib/bootstrap.css" rel="stylesheet" type="text/css" />
-    <script src="/static/lib/jquery.js"></script>
-    <script src="/static/lib/swal2.js"></script>
-    <script src="/static/lib/jsgrid.js"></script>
-    <link href="/static/lib/jsgrid.css" rel="stylesheet" type="text/css" />
-    <link href="/static/lib/jsgrid-theme.css" rel="stylesheet" type="text/css" />
+  
+    <link href="/static/styles/theme.css" rel="stylesheet" type="text/css" />
+   
     <link rel=icon href=/static/img/favicon.png>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     {% block dependancies %}{% endblock %}
+    <link href="/static/lib/bootstrap.css" rel="stylesheet" type="text/css" />
+<script src="/static/lib/jquery.js"></script>
+<script src="/static/lib/swal2.js"></script>
   </head>
   <body style="display:flex;flex-direction: column;min-height: 100vh;">
     <!-- Body Start -->
     <div>
       <nav class="navbar navbar-dark bg-primary navbar-expand-lg ">
-        <a class="navbar-brand" href="#">
+        <a class="navbar-brand" href="/">
             <img src="/static/img/brand-white.svg" width="30" height="30" class="d-inline-block align-top" alt="">
             Coffee
           </a>
@@ -29,20 +32,20 @@
           <ul class="navbar-nav mr-auto">
             <li class="nav-item dropdown">
               <a class="nav-link active dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Questions
+                Repository
               </a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                 <a class="dropdown-item" href="#">By Uni</a>
                 <a class="dropdown-item" href="#">By Course</a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#">All</a>
+                <a class="dropdown-item" href="#">Search</a>
               </div>
             </li>
             <li class="nav-item active">
-              <a class="nav-link" href="#">About</a>
+              <a class="nav-link" href="/about">About</a>
             </li>
             <li class="nav-item active">
-              <a class="nav-link" href="#">Get Started</a>
+              <a class="nav-link" href="/howto">Get Started</a>
             </li>
             <li class="nav-item active">
                 <a class="nav-link" href="#">Moderation</a>
@@ -50,10 +53,27 @@
             
             
           </ul>
-          <form class="form-inline my-2 my-lg-0">
-            <input class="form-control mr-sm-2" type="search" placeholder="Search Repository" aria-label="Search">
-            <button class="btn btn-success my-2 my-sm-0" type="submit">Search</button>
-          </form>
+          <div class="form-inline my-2 my-lg-0">
+            <ul class="navbar-nav mr-auto">
+              <li class="nav-item dropdown">
+                <a class="nav-link active dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  My Classes
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <a class="dropdown-item" href="#">ASRT 207</a>
+                  <a class="dropdown-item" href="#">CPSC 405</a>
+                  <a class="dropdown-item" href="#">POLI 281</a>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" href="#">More...</a>
+                </div>
+              </li>
+              <li class="nav-item active">
+                <a class="nav-link" href="/about">My Account</a>
+              </li>
+          
+              
+            </ul>
+          </div>
         </div>
       </nav> 
     </div>
@@ -62,6 +82,44 @@
 
       {% endblock %}
     </div>
+    <footer class="container py-5">
+        <div class="row">
+          <div class="col-12 col-md">
+            <img src="/static/img/brand-blue.svg" style="height:1.5rem;width:1.5rem;" />
+            
+            <small class="d-block mb-3 text-muted">© 2019-2020</small>
+          </div>
+          <div class="col-6 col-md">
+            <h5>Features</h5>
+            <ul class="list-unstyled text-small">
+              <li><a class="text-muted" href="#">Search Threads</a></li>
+              <li><a class="text-muted" href="#">Create Practice Quizzes</a></li>
+              <li><a class="text-muted" href="#">Collab On Assigments</a></li>
+              <li><a class="text-muted" href="#">Help Come Up With Practice Questions</a></li>
+              <li><a class="text-muted" href="#">More Things To Do...</a></li>
+              
+            </ul>
+          </div>
+          <div class="col-6 col-md">
+            <h5>Resources</h5>
+            <ul class="list-unstyled text-small">
+              <li><a class="text-muted" href="#">How To</a></li>
+              <li><a class="text-muted" href="#">Moderation</a></li>
+              <li><a class="text-muted" href="#">Questions</a></li>
+              <li><a class="text-muted" href="#">Generating Test</a></li>
+              <li><a class="text-muted" href="#">Developer API</a></li>
+            </ul>
+          </div>
+          <div class="col-6 col-md">
+            <h5>About</h5>
+            <ul class="list-unstyled text-small">
+              <li><a class="text-muted" href="#">About Us</a></li>
+              <li><a class="text-muted" href="#">Privacy</a></li>
+              <li><a class="text-muted" href="#">Terms</a></li>
+            </ul>
+          </div>
+        </div>
+      </footer>
     
   </body>
 </html>

@@ -1,9 +1,7 @@
 {% extends "layout.html" %}
 {% block title %}Coffee {% endblock %}
 {% block dependancies %}
-<link href="/static/lib/bootstrap.css" rel="stylesheet" type="text/css" />
-<script src="/static/lib/jquery.js"></script>
-<script src="/static/lib/swal2.js"></script>
+
 <script src="/static/lib/jsgrid.js"></script>
 <link href="/static/lib/jsgrid.css" rel="stylesheet" type="text/css" />
 <link href="/static/lib/jsgrid-theme.css" rel="stylesheet" type="text/css" />
@@ -16,117 +14,57 @@
     padding:1rem 0;
 }
 </style>
-<div class="container">
-    <div class="chat-buttons">
-            <input type="text" id="new-room-name"><button type="button" class="btn btn-primary btn-lg" id="new-chat-room">New Chat Room</button>
-    </div>
-    <div id="chatRoomGrid"></div>
-    
+<div class="content container" >
+    <div style="display:flex;align-items:center;justify-content:center;margin-bottom:2rem;font-size:1.5rem;">
+        Never study alone again, colaborate and get help with...
+      </div>
+     <div style="display:flex;align-items:center;justify-content:center;">
+       <div class="brand"></div>
+        <div  class="typewrite" data-period="2000" data-type='["Quizzes.","Practice Tests.","Assignments.", "Brainstorimg."]'>
+         <span class="wrap"></span>
+       </div>
+     </div>
+</div>
+<div class="container" style="text-align:center;margin-bottom:1rem;">
+    <input class="form-control" type="text" style="margin:0 auto;max-width: 30rem;text-align:center;font-size:1.25rem;"placeholder="Search For Your Course " >
+</div>
+<div class="container" style="text-align:center;margin-bottom:1rem;font-size:1.5rem;">
+    - or -
+</div >
+<div class="container" style="text-align:center;">
+    <a  href="/newroom" role="button" class="btn btn-primary btn-lg ">Start One For My Class</a>
+</div>
+<div class="room-list container">
+    <div class="list-group">
+        
+        {% for item in [1,2,3,4,5,6,7,8] %}
+            <a href="#" onclick='window.open("/static/chat.html?roomHash=7a6a4fc5d76c41c5392eab9d0fd8c83261f21fd0","mywindow","status=1");' class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                
+                <div style="display:flex;flex-direction:row;align-items: flex-end;">
+                    <div style="display:flex;flex-direction:column;">
+                    
+                    <div>CPSC 233</div>
+                    <div class="text-muted" style="font-size: 0.75rem">
+                        223 question 30 people online
+                    </div>
+                    </div >
+                    <div class="text-muted"  style="margin-left:2rem;font-size: 0.75rem">
+                            20 study Guides Generated 
+                            <br />
+                            45 Practices Tests Done 
+                        </div>
+                    
+                    </div>
+                <span class="badge badge-primary ">14</span>
+              </a>
+        {% else %}
+        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+            his would display if the 'item' collection were empty
+        </a>
+        {% endfor %}
+      </div>
 </div>
 
-<script>
-    function createCookie(name,value,days) {
-	if (days) {
-		var date = new Date();
-		date.setTime(date.getTime()+(days*24*60*60*1000));
-		var expires = "; expires="+date.toGMTString();
-	}
-	else var expires = "";
-	document.cookie = name+"="+value+expires+"; path=/";
-}
-function readCookie(name) {
-	var nameEQ = name + "=";
-	var ca = document.cookie.split(';');
-	for(var i=0;i < ca.length;i++) {
-		var c = ca[i];
-		while (c.charAt(0)==' ') c = c.substring(1,c.length);
-		if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
-	}
-	return null;
-}
-    function createRoom(){
-        
-    }
-$(function(){
-    //  buttons 
-    $("#new-chat-room").click(function(){
-        console.log("asdffasdfdsa");
-        $.post("/chat/NewChatRoom", { name: $("#new-room-name").val() })
-            .done(function( data ) {
-                data = JSON.parse(data);
-                if(data.success){
-                    window.open("/static/chat.html?roomHash="+data.hash,"mywindow","status=1");
-                }else{  //  create an error message if thinfs go wrong 
-                    Swal.fire({
-                    type: 'error',
-                    title: 'Error',
-                    text: 'Something whent wrong when creating your chat room. Please Try Again'
-                    });
-                }
-            });
-        });
-
-    //  see if the user has an account in local cookies
-    if(readCookie("privatekey") == null){
-        console.log("no user detected");
-        //  get a new account since they have none 
-        $.post("/chat/NewAccount").done(function(data){
-            data = JSON.parse(data);
-            if(data.success){
-                createCookie("privatekey",data.privatekey,1000);
-            }else{
-                //refresh the page
-                // or fail silently 
-            }
-        });
-    }
-
-
-    $("#chatRoomGrid").jsGrid({
-        width: "100%",
-        filtering: true,
-
-               editing: true,
-               sorting: true,
-               paging: true,
-               autoload: true,
-               pageSize: 20,
-               pageLoading:true,
-      pageButtonCount: 7,
-        fields: [
-            { name: "name",title: "Room Name", type: "text" },
-            { name: "hash",title: "Hash", type: "text" },
-            
-
-        ],
-        rowClick: function(args) {
-          console.log(args);
-          var getData = args.item;
-          var keys = Object.keys(getData);
-          var text = [];
-          window.open("/static/chat.html?roomHash="+getData.hash,"mywindow","status=1");
-
-        },
-        controller: {
-          loadData: function(filter) {
-                var d = $.Deferred();
-                $.ajax({
-                  type: 'POST',
-                    url: "/chat/GetChatRooms",
-                    dataType: "json",
-                    data: filter
-                }).done(function(dataResult) {
-                  console.log(dataResult);
-                    d.resolve(dataResult);
-                });
-
-                return d.promise();
-            }
-
-          }
-    });
-});
-</script>
-
+<script src="/static/scripts/index.js"></script>
 
 {% endblock %}
