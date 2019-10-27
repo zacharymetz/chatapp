@@ -31,6 +31,18 @@ router.get('/howto', (req, res) => {
 
   res.render('howto.html');
 });
+router.get('/search', (req, res) => {
+  //dont have to do nothing lol
 
+  res.render('search.html');
+});
 
+router.post('/search', (req, res) => {
+  //  for room searching 
+
+  res.send(JSON.stringify({
+    success : true,
+    data : []
+  }));
+});
 module.exports = router;

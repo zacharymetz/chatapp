@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+{% block title %}Search {% endblock %}
+{% block dependancies %}
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div>
+        <h2>
+            Search 
+        </h2>   
+    </div>
+    <div>
+
+    </div>
+    <div class="list-group">
+        
+        {% for item in [1,2,3,4,5,6,7,8] %}
+            <a href="#" onclick='window.open("/static/chat.html?roomHash=7a6a4fc5d76c41c5392eab9d0fd8c83261f21fd0","mywindow","status=1");' class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                
+                <div style="display:flex;flex-direction:row;align-items: flex-end;">
+                    <div style="display:flex;flex-direction:column;">
+                    
+                    <div>CPSC 233</div>
+                    <div class="text-muted" style="font-size: 0.75rem">
+                        223 question 30 people online
+                    </div>
+                    </div >
+                    <div class="text-muted"  style="margin-left:2rem;font-size: 0.75rem">
+                            20 study Guides Generated 
+                            <br />
+                            45 Practices Tests Done 
+                        </div>
+                    
+                    </div>
+                <span class="badge badge-primary ">14</span>
+                </a>
+        {% else %}
+        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+            his would display if the 'item' collection were empty
+        </a>
+        {% endfor %}
+        </div>
+        <br />
+        <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                  <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                  </li>
+                  <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                  <li class="page-item"><a class="page-link" href="#">2</a></li>
+                  <li class="page-item"><a class="page-link" href="#">3</a></li>
+                  <li class="page-item">
+                    <a class="page-link" href="#">Next</a>
+                  </li>
+                </ul>
+              </nav>
+
+</div>
+{% endblock %}

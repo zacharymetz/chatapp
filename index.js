@@ -29,8 +29,8 @@ nunjucks.configure('views', {
 var chat = require('./controllers/chat');
 var home = require('./controllers/home');
 var question = require('./controllers/question');
-var moderator = require('./controllers/moderator');
-app.use('/moderator', moderator);
+var auth = require('./controllers/auth');
+app.use('/auth', auth);
 app.use('/question', question);
 app.use('/chat', chat);
 app.use('/', home);

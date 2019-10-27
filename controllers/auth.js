@@ -12,7 +12,7 @@ var router = express.Router();
 router.get('/login', (req, res) => {
   //dont have to do nothing lol
 
-  res.render('mod/login.html');
+  res.render('auth/login.html');
 });
 router.post('/login', (req, res) => {
     //dont have to do nothing lol
@@ -27,7 +27,7 @@ router.post('/logout', (req, res) => {
 router.get('/signup', (req, res) => {
     //dont have to do nothing lol
   
-    res.render('mod/signup.html');
+    res.render('auth/signup.html');
   });
 
 module.exports = router;
